@@ -363,24 +363,11 @@
  <h2 class="heading text-4xl md:text-5xl font-semibold mb-4">Be the first to tidy your desk</h2>
  <p class="text-xl text-stone-300 mb-10">Beta opens April 2026.<br>First 5,000 members get lifetime 50% discount.</p>
 
- <form id="waitlistForm" onsubmit="submitWaitlist(event)" class="max-w-md mx-auto space-y-4">
- <input type="text" id="name" placeholder="First name"
- class="w-full px-6 py-4 rounded-xl text-stone-900 text-lg bg-white border-0 focus:ring-2 focus:ring-emerald-400">
- <div class="relative">
- <input type="email" id="email" placeholder="your@email.com" 
- class="w-full px-6 py-4 rounded-xl text-stone-900 text-lg bg-white border-0 focus:ring-2 focus:ring-emerald-400 pr-12">
- <i id="email-icon" class="fa-solid fa-envelope absolute right-4 top-1/2 -translate-y-1/2 text-stone-300"></i>
+ <!-- Tally Form Embed -->
+ <div class="max-w-md mx-auto">
+ <iframe data-tally-src="https://tally.so/embed/2EkojM?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" loading="lazy" width="100%" height="277" frameborder="0" marginheight="0" marginwidth="0" title="waitList"></iframe>
+ <script>var d=document,w="https://tally.so/widgets/embed.js",v=function(){"undefined"!=typeof Tally?Tally.loadEmbeds():d.querySelectorAll("iframe[data-tally-src]:not([src])").forEach((function(e){e.src=e.dataset.tallySrc}))};if("undefined"!=typeof Tally)v();else if(d.querySelector('script[src="'+w+'"]')==null){var s=d.createElement("script");s.src=w,s.onload=v,s.onerror=v,d.body.appendChild(s);}</script>
  </div>
- <p id="email-error" class="text-red-500 text-sm hidden flex items-center gap-2">
- <i class="fa-solid fa-circle-exclamation"></i>
- <span>Please enter a valid email address</span>
- </p>
- <button type="submit"
- class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-semibold text-lg py-4 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/30 transition-all hover:shadow-emerald-500/50">
- Join Waitlist Now – It's Free
- <i class="fa-solid fa-arrow-right"></i>
- </button>
- </form>
  </div>
  </section>
 
