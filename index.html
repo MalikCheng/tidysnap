@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>TidySnap — Snap Once. Tidy Forever.</title>
+ <script src="https://cdn.tailwindcss.com"></script>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+ <style>
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+ body {
+ font-family: 'Inter', sans-serif;
+ }
+
+ .heading {
+ font-family: 'Space Grotesk', sans-serif;
+ }
+
+ .hero-bg {
+ background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+ }
+
+ .snap-card:hover {
+ transform: translateY(-12px);
+ box-shadow: 0 25px 50px -12px rgb(16 185 129 / 0.25);
+ }
+
+ .countdown {
+ font-variant-numeric: tabular-nums;
+ }
+ </style>
+</head>
+
+<body class="bg-zinc-50 text-zinc-900">
+
+ <!-- NAVBAR -->
+ <nav class="bg-white border-b sticky top-0 z-50">
+ <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+ <div class="flex items-center gap-x-3">
+ <div
+ class="w-9 h-9 bg-emerald-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
+ 📸</div>
+ <span class="text-3xl font-bold tracking-tighter heading">TidySnap</span>
+ </div>
+ <button onclick="document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' })"
+ class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl transition">
+ Join Waitlist
+ </button>
+ </div>
+ </nav>
+
+ <!-- HERO -->
+ <section class="hero-bg text-white pt-20 pb-16">
+ <div class="max-w-5xl mx-auto px-6 text-center">
+ <div
+ class="inline-flex items-center gap-x-2 bg-white/20 backdrop-blur-md px-5 py-2 rounded-3xl text-sm font-medium mb-6">
+ <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+ Beta April 2026 • First 5,000 get lifetime 50% off
+ </div>
+ <h1 class="heading text-6xl md:text-7xl font-bold tracking-tighter leading-none mb-6">
+ Snap the mess.<br>
+ Get the perfect plan.
+ </h1>
+ <p class="text-xl md:text-2xl max-w-2xl mx-auto text-white/90">
+ One photo of your messy desk → AI instantly marks exactly where everything should go.
+ </p>
+ <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+ <button onclick="document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' })"
+ class="px-10 py-5 bg-white text-emerald-700 hover:bg-emerald-50 text-xl font-semibold rounded-3xl shadow-xl flex items-center gap-x-3">
+ Join the Waitlist Now
+ </button>
+ </div>
+ </div>
+ </section>
+
+ <!-- HOW IT WORKS -->
+ <section id="how" class="py-20 bg-white">
+ <div class="max-w-6xl mx-auto px-6">
+ <div class="text-center mb-12">
+ <h2 class="heading text-5xl font-semibold">3 Steps • 30 Seconds</h2>
+ </div>
+ <div class="grid md:grid-cols-3 gap-8">
+ <div class="snap-card bg-zinc-50 border border-zinc-100 rounded-3xl p-8 text-center">
+ <div
+ class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl mx-auto flex items-center justify-center text-4xl mb-6">
+ 📸</div>
+ <h3 class="text-2xl font-semibold mb-3">1. Snap a photo</h3>
+ <p class="text-zinc-600">Your messy desk — just take one picture.</p>
+ </div>
+ <div class="snap-card bg-zinc-50 border border-zinc-100 rounded-3xl p-8 text-center">
+ <div
+ class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl mx-auto flex items-center justify-center text-4xl mb-6">
+ 🧠</div>
+ <h3 class="text-2xl font-semibold mb-3">2. AI analyzes</h3>
+ <p class="text-zinc-600">Identifies every item and plans the perfect layout.</p>
+ </div>
+ <div class="snap-card bg-zinc-50 border border-zinc-100 rounded-3xl p-8 text-center">
+ <div
+ class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl mx-auto flex items-center justify-center text-4xl mb-6">
+ ✨</div>
+ <h3 class="text-2xl font-semibold mb-3">3. Get your plan</h3>
+ <p class="text-zinc-600">Download the photo with arrows and labels.</p>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- BEFORE / AFTER EXAMPLES -->
+ <section id="examples" class="py-20 bg-zinc-100">
+ <div class="max-w-6xl mx-auto px-6">
+ <h2 class="heading text-5xl font-semibold text-center mb-12">Real Desk Transformations</h2>
+
+ <div class="grid md:grid-cols-2 gap-12">
+ <!-- Before -->
+ <div>
+ <p class="text-center text-sm text-red-600 font-medium mb-3">BEFORE — Messy Desk</p>
+ <img id="before-img" src="https://picsum.photos/id/201/800/500" alt="Messy desk before"
+ class="rounded-3xl shadow-xl w-full border border-zinc-200">
+ </div>
+
+ <!-- After -->
+ <div>
+ <p class="text-center text-sm text-emerald-600 font-medium mb-3">AFTER + AI MARKERS</p>
+ <img id="after-img" src="https://picsum.photos/id/1015/800/500" alt="Tidy desk after with AI arrows"
+ class="rounded-3xl shadow-xl w-full border border-emerald-300">
+ </div>
+ </div>
+
+ <!-- 你用Nana Banana生成的图替换下面两行 -->
+ <!-- 把上面两张 img src 换成你生成的 Before 和 After 图 -->
+ </div>
+ </section>
+
+ <!-- FEATURES -->
+ <section id="features" class="py-20 bg-white">
+ <div class="max-w-6xl mx-auto px-6">
+ <div class="grid md:grid-cols-2 gap-16 items-center">
+ <div>
+ <h2 class="heading text-5xl font-semibold leading-tight">Visual instructions,<br>not just advice.
+ </h2>
+ <ul class="mt-10 space-y-8 text-lg">
+ <li class="flex gap-4"><i class="fa-solid fa-arrow-right text-emerald-600 text-2xl mt-1"></i>
+ <div><strong>Item-by-item arrows</strong><br>Pens, cables, mug — every item labeled.</div>
+ </li>
+ <li class="flex gap-4"><i class="fa-solid fa-arrow-right text-emerald-600 text-2xl mt-1"></i>
+ <div><strong>Smart layout</strong><br>Based on usage frequency & ergonomics.</div>
+ </li>
+ <li class="flex gap-4"><i class="fa-solid fa-arrow-right text-emerald-600 text-2xl mt-1"></i>
+ <div><strong>Works on any desk</strong><br>Remote workers, students, home office.</div>
+ </li>
+ </ul>
+ </div>
+ <div class="bg-zinc-900 rounded-3xl p-8 text-white">
+ <img id="feature-img" src="https://picsum.photos/id/1016/700/420" alt="AI output demo"
+ class="rounded-2xl shadow-2xl mx-auto">
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- WAITLIST CTA -->
+ <section id="waitlist" class="py-24 bg-gradient-to-br from-emerald-700 to-teal-700 text-white">
+ <div class="max-w-2xl mx-auto px-6 text-center">
+ <div class="inline-flex items-center gap-3 bg-red-500/90 hover:bg-red-500 px-8 py-4 rounded-2xl text-lg font-bold mb-8 shadow-2xl shadow-red-500/50 animate-pulse">
+ <span class="text-3xl">🔥</span>
+ <span>Only <span id="countdown" class="countdown text-4xl text-yellow-200">4,872</span> early spots left</span>
+ </div>
+ <h2 class="heading text-5xl font-semibold mb-4">Be the first to tidy your desk</h2>
+ <p class="text-xl mb-10">Beta opens April 2026.<br>First 5,000 members get lifetime 50% discount.</p>
+
+ <form id="waitlistForm" onsubmit="submitWaitlist(event)" class="max-w-md mx-auto space-y-4">
+ <input type="text" id="name" placeholder="First name"
+ class="w-full px-8 py-6 rounded-3xl text-zinc-900 text-lg">
+ <input type="email" id="email" placeholder="your@email.com" required
+ class="w-full px-8 py-6 rounded-3xl text-zinc-900 text-lg">
+ <button type="submit"
+ class="w-full bg-white text-emerald-700 hover:bg-emerald-100 font-semibold text-xl py-6 rounded-3xl flex items-center justify-center gap-3">
+ Join Waitlist Now – It's Free
+ <i class="fa-solid fa-arrow-right"></i>
+ </button>
+ </form>
+ </div>
+ </section>
+
+ <!-- FOOTER -->
+ <footer class="bg-zinc-900 text-white py-16">
+ <div class="max-w-6xl mx-auto px-6 text-center">
+ <div class="flex justify-center mb-8">
+ <div class="flex items-center gap-x-3">
+ <div
+ class="w-9 h-9 bg-emerald-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
+ 📸</div>
+ <span class="text-3xl font-bold tracking-tighter heading">TidySnap</span>
+ </div>
+ </div>
+ <p class="text-zinc-400">One photo. Perfect desk. Forever.</p>
+ <p class="text-xs text-zinc-500 mt-12">© 2026 TidySnap AI</p>
+ </div>
+ </footer>
+
+ <!-- GA4 + Form Script -->
+ <script>
+ // === 替换成你的 GA4 ID ===
+ window.dataLayer = window.dataLayer || [];
+ function gtag() { dataLayer.push(arguments); }
+ gtag('js', new Date());
+ gtag('config', 'G-XXXXXXXXXX');
+
+ function submitWaitlist(e) {
+ e.preventDefault();
+ const email = document.getElementById('email').value;
+ if (!email) return;
+
+ // GA4 转化事件
+ gtag('event', 'waitlist_signup', { value: 1 });
+
+ alert('🎉 Thank you! You are on the waitlist. Beta opens soon!');
+ e.target.reset();
+ }
+
+ // 简单倒计时（示例）
+ let spots = 4872;
+ setInterval(() => {
+ if (spots > 4200) {
+ spots -= Math.floor(Math.random() * 3) + 1;
+ document.getElementById('countdown').textContent = spots;
+ }
+ }, 8000);
+ </script>
+</body>
+
+</html>
