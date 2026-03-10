@@ -470,7 +470,10 @@
  
  // Show success
  form.innerHTML = `
- <div class="success-checkmark text-center py-8">
+ <div class="success-checkmark text-center py-8 relative">
+ <button onclick="this.closest('form').reset(); location.reload()" class="absolute top-0 right-0 w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-400 hover:text-stone-600 transition">
+ <i class="fa-solid fa-xmark"></i>
+ </button>
  <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
  <i class="fa-solid fa-check text-4xl text-emerald-600"></i>
  </div>
