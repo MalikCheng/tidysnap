@@ -46,3 +46,11 @@ Blog posts are defined in `src/content.config.ts` with:
 - **Vercel CLI**: Logged in (deploys from main branch)
 - **Stripe CLI**: Logged in
 - **API Keys**: Gemini Nano Banana API key stored in `.enc.local` (also available in production)
+
+### Config Files
+
+- `astro.config.mjs` - Astro configuration (site URL, Vite plugins, HTML compression)
+- `tailwind.config.mjs` - Tailwind CSS v4 configuration
+- `package.json` - Project dependencies and scripts
+- `.env.local` - Local environment variables
+- `.gitignore` - Git ignore rules
