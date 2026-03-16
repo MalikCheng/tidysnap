@@ -1,0 +1,353 @@
+---
+import { getCollection, render } from 'astro:content';
+import BlogLayout from '../../BlogLayout.astro';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	return posts.map((post) => ({
+		params: { slug: post.id.replace(/\.md$/, '') },
+		props: post,
+	}));
+}
+
+const post = Astro.props;
+const { Content } = await render(post);
+
+function getReadingTime(content) {
+  const wordsPerMinute = 200;
+  const words = content.split(/\s+/).length;
+  return Math.ceil(words / wordsPerMinute);
+}
+
+const readingTime = getReadingTime(post.body || '');
+
+function formatDate(date) {
+  return date.toLocaleDateString('zh-CN', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+}
+
+// Unique gradients for each article based on slug - using complete class names for Tailwind
+const gradients = [
+  { from: 'from-emerald-500', via: 'via-teal-500', to: 'to-cyan-500', bg: 'emerald', text: 'text-emerald-300', bgLight: 'bg-emerald-500/20', border: 'border-emerald-500/20' },
+  { from: 'from-cyan-500', via: 'via-blue-500', to: 'to-indigo-500', bg: 'cyan', text: 'text-cyan-300', bgLight: 'bg-cyan-500/20', border: 'border-cyan-500/20' },
+  { from: 'from-violet-500', via: 'via-purple-500', to: 'to-fuchsia-500', bg: 'violet', text: 'text-violet-300', bgLight: 'bg-violet-500/20', border: 'border-violet-500/20' },
+  { from: 'from-amber-500', via: 'via-orange-500', to: 'to-rose-500', bg: 'amber', text: 'text-amber-300', bgLight: 'bg-amber-500/20', border: 'border-amber-500/20' },
+  { from: 'from-rose-500', via: 'via-pink-500', to: 'to-rose-500', bg: 'rose', text: 'text-rose-300', bgLight: 'bg-rose-500/20', border: 'border-rose-500/20' },
+  { from: 'from-teal-500', via: 'via-emerald-500', to: 'to-teal-600', bg: 'teal', text: 'text-teal-300', bgLight: 'bg-teal-500/20', border: 'border-teal-500/20' },
+];
+
+// Generate unique gradient based on post slug
+const gradientIndex = post.id.charCodeAt(0) % gradients.length;
+const gradient = gradients[gradientIndex];
+---
+
+<BlogLayout title={post.data.title} description={post.data.description} image={post.data.heroImage}>
+  <!-- Fixed Glass Navbar -->
+  <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="navbar">
+    <nav class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+      <a href="https://tidysnap.homes" class="flex items-center gap-2.5 group">
+        <div class="w-9 h-9 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white text-sm shadow-lg shadow-emerald-500/30 group-hover:shadow-emerald-500/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+          📸
+        </div>
+        <span class="text-base font-bold heading text-white hidden sm:block">TidySnap</span>
+      </a>
+
+      <!-- Mobile Menu Button - increased touch target to 44px -->
+      <button id="mobile-menu-btn" class="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-stone-300 hover:text-white transition-colors rounded-lg hover:bg-stone-800/50" aria-label="Toggle menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+
+      <div class="hidden sm:flex items-center gap-3 sm:gap-5">
+        <a href="/blog" class="text-sm font-medium text-emerald-400 relative group">
+          Blog
+          <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-emerald-400"></span>
+        </a>
+        <a href="https://tidysnap.homes/#waitlist" class="btn-primary px-4 py-2 text-sm font-medium rounded-xl text-white flex items-center gap-1.5">
+          <span>Join</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </a>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu Dropdown -->
+    <div id="mobile-menu" class="hidden sm:hidden bg-stone-900/95 backdrop-blur-lg border-t border-stone-800">
+      <div class="px-4 py-3 space-y-2">
+        <a href="/blog" class="block text-sm font-medium text-emerald-400 py-3 px-2 rounded-lg hover:bg-stone-800/50">Blog</a>
+        <a href="https://tidysnap.homes/#waitlist" class="block btn-primary px-4 py-3 text-sm font-medium rounded-xl text-white text-center">
+          Join Waitlist
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Reading Progress Bar -->
+  <div class="fixed top-[53px] left-0 right-0 h-1 z-40">
+    <div id="progress-bar" class={`h-full bg-gradient-to-r ${gradient.from} ${gradient.to} w-0 transition-all duration-150`}></div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="pt-24 pb-12 sm:pt-28 sm:pb-16 bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950 relative overflow-hidden">
+    <!-- Animated Background -->
+    <div class="absolute inset-0">
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.03\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+      <!-- Gradient Glow -->
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-gradient-to-b from-stone-800/50 to-transparent"></div>
+    </div>
+    
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 relative">
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2.5 text-sm text-stone-500 mb-6">
+        <a href="/blog" class="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Blog
+        </a>
+        <svg class="w-4 h-4 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+        <span class="text-stone-400">Article</span>
+      </nav>
+
+      <!-- Tags -->
+      <div class="flex flex-wrap gap-2 mb-5">
+        {post.data.tags.map((tag) => (
+          <span class={`text-xs font-semibold ${gradient.text} ${gradient.bgLight} px-3.5 py-1.5 rounded-full border ${gradient.border}`}>{tag}</span>
+        ))}
+      </div>
+
+      <!-- Title -->
+      <h1 class="heading text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-5 leading-tight">
+        {post.data.title}
+      </h1>
+
+      <!-- Meta -->
+      <div class="flex flex-wrap items-center gap-4 text-sm text-stone-400">
+        <span class="flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          {formatDate(post.data.pubDate)}
+        </span>
+        <span class="w-1 h-1 bg-stone-600 rounded-full"></span>
+        <span class="flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          {readingTime} min read
+        </span>
+        <span class="w-1 h-1 bg-stone-600 rounded-full"></span>
+        <span class="flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+          </svg>
+          Article
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hero Image -->
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 -mt-10 relative z-10">
+    {post.data.heroImage ? (
+      <div class="h-56 sm:h-72 lg:h-96 rounded-3xl overflow-hidden shadow-2xl shadow-black/50 relative group">
+        <img 
+          src={post.data.heroImage} 
+          alt={post.data.title}
+          class="w-full h-full object-cover"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
+      </div>
+    ) : (
+    <div class={`h-56 sm:h-72 lg:h-96 bg-gradient-to-br ${gradient.from} ${gradient.via} ${gradient.to} rounded-3xl overflow-hidden shadow-2xl shadow-black/50 relative group`}>
+      <!-- Texture -->
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M20 20.5V29m0-18v8.5m-8.5 9.5h17" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" opacity="0.1"/%3E%3C/svg%3E')] opacity-60"></div>
+      <!-- Gradient Overlay -->
+      <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10"></div>
+      <!-- Glow -->
+      <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
+      <div class="absolute -left-10 top-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+      
+      <!-- Centered Icon -->
+      <div class="absolute inset-0 flex items-center justify-center">
+        <span class="text-7xl sm:text-8xl lg:text-9xl filter drop-shadow-2xl transform group-hover:scale-110 transition-transform duration-700">📸</span>
+      </div>
+    </div>
+    )}
+  </div>
+
+  <!-- Article Content -->
+  <div class="py-8 sm:py-12 lg:py-16">
+    <div class="max-w-2xl sm:max-w-3xl mx-auto px-3 sm:px-6">
+      <article class="prose prose-lg prose-emerald max-w-none
+        prose-headings:heading prose-headings:font-bold prose-headings:text-stone-100 prose-headings:mt-8 prose-headings:mb-4
+        prose-p:text-stone-300 prose-p:leading-7 prose-p:text-base sm:prose-p:text-[1.05rem] prose-p:mb-5 sm:prose-p:mb-6
+        prose-a:text-emerald-400 prose-a:no-underline hover:prose-a:text-emerald-300 prose-a:transition-colors prose-a:border-b prose-a:border-emerald-400/30 hover:prose-a:border-emerald-300
+        prose-strong:text-stone-100 prose-strong:font-semibold
+        prose-code:text-teal-300 prose-code:bg-teal-500/10 prose-code:px-2.5 prose-code:py-1 prose-code:rounded-md prose-code:text-sm prose-code:font-medium prose-code:border prose-code:border-teal-500/20
+        prose-pre:bg-stone-900 prose-pre:text-stone-100 prose-pre:rounded-xl prose-pre:shadow-lg prose-pre:border prose-pre:border-stone-800 prose-pre:my-6 sm:prose-pre:my-8
+        prose-li:text-stone-300 prose-li:mb-2 prose-li:marker:text-emerald-500
+        prose-hr:border-stone-800 prose-hr:my-8 sm:prose-hr:my-10
+        prose-blockquote:border-l-4 prose-blockquote:border-emerald-500 prose-blockquote:bg-emerald-500/5 prose-blockquote:px-4 sm:prose-blockquote:px-6 prose-blockquote:py-3 sm:prose-blockquote:py-4 prose-blockquote:rounded-r-xl prose-blockquote:not-italic prose-blockquote:text-stone-300 prose-blockquote:my-6 sm:prose-blockquote:my-8
+        prose-img:rounded-xl sm:prose-img:rounded-2xl prose-img:shadow-lg sm:prose-img:shadow-xl prose-img:my-6 sm:prose-img:my-10 prose-img:shadow-emerald-500/10
+        prose-table:rounded-xl prose-table:overflow-hidden prose-table:shadow-sm
+        prose-th:bg-stone-800 prose-th:font-semibold prose-th:text-stone-200 prose-th:px-3 sm:prose-th:px-4 prose-th:py-2 sm:prose-th:py-3
+        prose-td:border-stone-800 prose-td:text-stone-300 prose-td:px-3 sm:prose-td:px-4 prose-td:py-2 sm:prose-td:py-3
+        prose-headings:scroll-mt-24
+        bg-stone-900/50 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-5 sm:p-8 lg:p-12 border border-stone-800/50 shadow-xl sm:shadow-2xl shadow-black/20">
+        <Content />
+      </article>
+
+      <!-- Share & CTA -->
+      <div class="mt-12 flex flex-col sm:flex-row items-center justify-between gap-6 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden group">
+        <!-- Background Effects -->
+        <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+        <div class="absolute -left-20 -bottom-20 w-60 h-60 bg-teal-400/20 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700"></div>
+        <!-- Grid Pattern -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"30\" height=\"30\" viewBox=\"0 0 30 30\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cpath d=\"M15 15.5V24m0-18v8.5m-8.5 9.5h17\" stroke=\"%23ffffff\" stroke-width=\"1\" stroke-linecap=\"round\" opacity=\"0.1\"/%3E%3C/svg%3E')] opacity-50"></div>
+        
+        <div class="relative">
+          <h3 class="heading text-xl sm:text-2xl font-bold mb-2">Enjoyed this article?</h3>
+          <p class="text-emerald-100">Share it with your network or join our waitlist for more tips!</p>
+        </div>
+        <a href="https://tidysnap.homes/#waitlist" class="flex-shrink-0 inline-flex items-center gap-2.5 bg-white text-emerald-700 px-6 py-3 font-bold rounded-xl hover:bg-emerald-50 transition-all duration-300 hover:scale-105 hover:shadow-xl shadow-lg">
+          Join Waitlist
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Back to Blog -->
+      <div class="mt-10 text-center">
+        <a href="/blog" class="inline-flex items-center gap-2.5 text-stone-400 hover:text-emerald-400 transition-colors font-medium group">
+          <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Back to all articles
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-stone-950 text-white py-12 relative overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-500/5 rounded-full blur-3xl"></div>
+    </div>
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 relative">
+      <div class="grid sm:grid-cols-3 gap-10 mb-10">
+        <!-- Brand -->
+        <div class="sm:col-span-1">
+          <div class="flex items-center gap-x-3 mb-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-2xl shadow-lg shadow-emerald-500/20">📸</div>
+            <span class="text-xl font-bold heading">TidySnap</span>
+          </div>
+          <p class="text-stone-400 text-sm leading-relaxed">AI-powered desk organization that transforms your workspace into a productivity haven.</p>
+        </div>
+        
+        <!-- Links -->
+        <div>
+          <h4 class="font-bold mb-4 text-white">Quick Links</h4>
+          <ul class="space-y-3">
+            <li><a href="https://tidysnap.homes" class="text-stone-400 hover:text-emerald-400 transition-colors text-sm">Home</a></li>
+            <li><a href="/blog" class="text-stone-400 hover:text-emerald-400 transition-colors text-sm">Blog</a></li>
+            <li><a href="https://tidysnap.homes/#waitlist" class="text-stone-400 hover:text-emerald-400 transition-colors text-sm">Join Waitlist</a></li>
+          </ul>
+        </div>
+        
+        <!-- Social -->
+        <div>
+          <h4 class="font-bold mb-4 text-white">Connect</h4>
+          <div class="flex gap-3">
+            <a href="#" class="w-10 h-10 bg-stone-800 hover:bg-emerald-600 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110" aria-label="Twitter">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </a>
+            <a href="#" class="w-10 h-10 bg-stone-800 hover:bg-emerald-600 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110" aria-label="GitHub">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+            </a>
+            <a href="#" class="w-10 h-10 bg-stone-800 hover:bg-emerald-600 rounded-xl flex items-center justify-center transition-all duration-200 hover:scale-110" aria-label="Email">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="border-t border-stone-800 pt-8 text-center">
+        <p class="text-stone-500 text-sm">© 2026 TidySnap AI. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</BlogLayout>
+
+<style>
+  /* Navbar blur effect */
+  #navbar {
+    background: rgba(15, 15, 15, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+  }
+</style>
+
+<script>
+  // Reading progress bar
+  function updateProgressBar() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = (scrollTop / docHeight) * 100;
+    const progressBar = document.getElementById('progress-bar');
+    if (progressBar) {
+      progressBar.style.width = Math.min(progress, 100) + '%';
+    }
+  }
+
+  window.addEventListener('scroll', updateProgressBar, { passive: true });
+  updateProgressBar();
+
+  // Navbar scroll effect
+  const navbar = document.getElementById('navbar');
+  
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.scrollY;
+    
+    if (currentScroll > 50) {
+      navbar.style.background = 'rgba(15, 15, 15, 0.95)';
+      navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.3)';
+    } else {
+      navbar.style.background = 'rgba(15, 15, 15, 0.8)';
+      navbar.style.boxShadow = 'none';
+    }
+  }, { passive: true });
+
+  // Mobile menu toggle
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  
+  if (mobileMenuBtn && mobileMenu) {
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+    
+    // Close menu when clicking a link
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+      });
+    });
+  }
+</script>

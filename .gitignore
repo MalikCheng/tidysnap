@@ -1,2 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Astro cache
+.astro/
+
+# Vercel
 .vercel
+
+# Environment
+.env
 .env*.local
+
+# IDE
+.vscode/
+.idea/

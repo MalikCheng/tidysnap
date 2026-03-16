@@ -1,0 +1,108 @@
+---
+import { getCollection, render } from 'astro:content';
+import BlogLayout from '../../layouts/BlogLayout.astro';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	return posts.map((post) => ({
+		params: { slug: post.id },
+		props: post,
+	}));
+}
+
+const post = Astro.props;
+const { Content } = await render(post);
+---
+
+<BlogLayout title={post.data.title} description={post.data.description} image={post.data.heroImage}>
+  <!-- Header -->
+  <header class="bg-white border-b border-stone-100">
+    <nav class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
+      <a href="https://tidysnap.homes" class="flex items-center gap-x-3 group">
+        <div class="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center text-white text-xl shadow-sm group-hover:shadow-md transition-shadow">📸</div>
+        <span class="text-2xl font-bold tracking-tight heading text-stone-800">TidySnap</span>
+      </a>
+      <a href="/blog" class="text-stone-500 hover:text-emerald-600 font-medium transition-colors flex items-center gap-2">
+        <span class="hidden sm:inline">返回博客</span>
+        <span class="sm:hidden">返回</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      </a>
+    </nav>
+  </header>
+
+  <!-- Article -->
+  <article class="py-12 sm:py-16 bg-stone-50">
+    <div class="max-w-2xl mx-auto px-5 sm:px-6">
+      <!-- Meta -->
+      <div class="text-center mb-10">
+        <!-- Tags -->
+        <div class="flex flex-wrap justify-center gap-2 mb-6">
+          {post.data.tags.map((tag) => (
+            <span class="text-xs font-medium text-emerald-700 bg-emerald-50/80 px-3 py-1.5 rounded-lg border border-emerald-100">{tag}</span>
+          ))}
+        </div>
+        <!-- Title -->
+        <h1 class="heading text-2.5xl sm:text-4xl font-bold text-stone-800 mb-5 leading-tight">{post.data.title}</h1>
+        <!-- Date & Reading Time -->
+        <div class="flex items-center justify-center gap-4 text-sm text-stone-400">
+          <time datetime={post.data.pubDate.toISOString()} class="flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            {post.data.pubDate.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </time>
+          <span class="w-1 h-1 bg-stone-300 rounded-full"></span>
+          <span class="flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            5 分钟阅读
+          </span>
+        </div>
+      </div>
+
+      <!-- Hero Image -->
+      {post.data.heroImage && (
+        <div class="mb-12 rounded-2xl overflow-hidden shadow-lg">
+          <div class="h-64 sm:h-80 bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+            <span class="text-8xl">📸</span>
+          </div>
+        </div>
+      )}
+
+      <!-- Content -->
+      <div class="prose prose-lg prose-emerald max-w-none
+        prose-headings:font-bold prose-headings:heading prose-headings:text-stone-800
+        prose-h1:text-2.5xl prose-h1:mt-12 prose-h1:mb-6 prose-h1:leading-tight
+        prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
+        prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3
+        prose-p:text-stone-600 prose-p:leading-relaxed prose-p:text-[1.125rem]
+        prose-a:text-emerald-600 prose-a:no-underline prose-a:border-b prose-a:border-emerald-200 hover:prose-a:border-emerald-500 transition-colors
+        prose-code:text-emerald-600 prose-code:bg-emerald-50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none
+        prose-pre:bg-stone-800 prose-pre:rounded-xl prose-pre:shadow-lg
+        prose-blockquote:border-l-emerald-400 prose-blockquote:bg-emerald-50/50 prose-blockquote:py-1 prose-blockquote:px-5 prose-blockquote:rounded-r-lg prose-blockquote:not-italic
+        prose-li:text-stone-600 prose-li:leading-relaxed
+        prose-img:rounded-xl prose-img:shadow-md
+        prose-hr:border-stone-200
+        prose-strong:text-stone-700 prose-strong:font-semibold
+        bg-white rounded-2xl p-8 sm:p-10 shadow-sm
+        [&_p]:mb-6 [&_p]:last:mb-0
+        [&>h2]:mt-10 [&>h2]:pt-2
+        [&>h3]:mt-8
+        [&>ul]:my-6 [&>ol]:my-6
+      ">
+        <Content />
+      </div>
+
+      <!-- CTA -->
+      <div class="mt-14 text-center bg-white rounded-2xl p-8 shadow-sm">
+        <p class="text-stone-600 mb-5 font-medium">觉得这篇文章有帮助？</p>
+        <a href="https://tidysnap.homes/#waitlist" class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 px-6 py-3 text-base font-semibold rounded-xl text-white transition shadow-sm hover:shadow-md">
+          加入等待列表
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+      </div>
+    </div>
+  </article>
+
+  <!-- Footer -->
+  <footer class="bg-stone-950 text-white py-8 text-center">
+    <p class="text-stone-400">© 2026 TidySnap AI</p>
+  </footer>
+</BlogLayout>

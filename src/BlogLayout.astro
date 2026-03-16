@@ -1,0 +1,127 @@
+---
+import './styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+}
+
+const { 
+  title, 
+  description = "TidySnap Blog - AI-powered desk organization tips and tricks", 
+  image = "/blog/og-image.png" 
+} = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Performance Hints -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- SEO -->
+    <title>{title} | TidySnap Blog</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(image, Astro.site)} />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={new URL(image, Astro.site)} />
+    
+    <!-- RSS -->
+    <link rel="alternate" type="application/rss+xml" title="TidySnap Blog" href="/blog/rss.xml" />
+    
+    <!-- Fonts: Sora + Outfit with display swap -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style is:global>
+      /* Font-display swap to prevent FOIT */
+      @font-face {
+        font-family: 'Sora';
+        font-display: swap;
+        src: local('Sora');
+      }
+      @font-face {
+        font-family: 'Outfit';
+        font-display: swap;
+        src: local('Outfit');
+      }
+    </style>
+  </head>
+  <body class="bg-stone-950 text-stone-100 antialiased min-h-screen">
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  /* Base styles */
+  body {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  .heading {
+    font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Button primary - shared across all pages */
+  .btn-primary {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+    transition: all 0.3s ease;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 6px 24px 0 rgba(5, 150, 105, 0.35);
+    transform: translateY(-1px);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #1c1917;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #44403c;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #57534e;
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(16, 185, 129, 0.3);
+    color: #f0fdf4;
+  }
+
+  /* Smooth focus outlines */
+  *:focus-visible {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+  }
+</style>

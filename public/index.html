@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+ <!-- Google Analytics 4 + Google Ads 代码 -->
+ <script async src="https://www.googletagmanager.com/gtag/js?id=G-2PQ8FZSK98"></script>
+ <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17863774442"></script>
+ <script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2PQ8FZSK98'); <!-- 您的 GA4 ID -->
+  gtag('config', 'AW-17863774442'); <!-- 您的 Google Ads ID -->
+ </script>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>TidySnap — Snap Once. Tidy Forever.</title>
+ <meta name="theme-color" content="#059669">
+ <link rel="icon" href="favicon.svg" type="image/svg+xml">
+ <script src="https://cdn.tailwindcss.com"></script>
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+ <style>
+ @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap');
+
+ :root {
+ --color-bg: #FAFAF9;
+ --color-surface: #FFFFFF;
+ --color-text: #1C1917;
+ --color-text-muted: #57534E;
+ --color-accent: #059669;
+ --color-accent-warm: #D97706;
+ }
+
+ body {
+ font-family: 'Outfit', sans-serif;
+ background-color: var(--color-bg);
+ color: var(--color-text);
+ }
+
+ .heading {
+ font-family: 'Sora', sans-serif;
+ }
+
+ .hero-bg {
+ background: linear-gradient(160deg, #065F46 0%, #047857 50%, #10B981 100%);
+ }
+
+ .snap-card {
+ transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+ }
+
+ .snap-card:hover {
+ transform: translateY(-12px);
+ box-shadow: 0 30px 60px -15px rgb(5 150 105 / 0.25);
+ }
+
+ .countdown {
+ font-variant-numeric: tabular-nums;
+ }
+
+ .gradient-text {
+ background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+ }
+
+ .btn-primary {
+ background: linear-gradient(135deg, #059669 0%, #047857 100%);
+ transition: all 0.3s ease;
+ }
+
+ .btn-primary:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 20px 40px -10px rgb(5 150 105 / 0.4);
+ }
+
+ .btn-primary:active {
+ transform: translateY(0) scale(0.98);
+ }
+
+ .btn-glow:hover {
+ box-shadow: 0 0 30px rgba(5, 150, 105, 0.5), 0 20px 40px -10px rgb(5 150 105 / 0.4);
+ }
+
+ input:focus {
+ outline: none;
+ box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.3);
+ }
+
+ .success-checkmark {
+ animation: scaleIn 0.3s ease-out;
+ }
+
+ @keyframes scaleIn {
+ from { transform: scale(0); opacity: 0; }
+ to { transform: scale(1); opacity: 1; }
+ }
+
+ @keyframes bounce {
+ 0%, 100% { transform: translateY(0); }
+ 50% { transform: translateY(-5px); }
+ }
+
+ .bounce-subtle {
+ animation: bounce 2s infinite;
+ }
+ </style>
+ <!-- Event snippet for 网页浏览 conversion page -->
+ <script>
+  gtag('event', 'conversion', {
+  'send_to': 'AW-18008935357/qaChCPHJzoYcEL2XqotD',
+  'value': 1.0,
+  'currency': 'CNY'
+  });
+ </script>
+</head>
+
+<body class="bg-zinc-50 text-zinc-900">
+
+ <!-- NAVBAR -->
+ <nav class="bg-white/80 backdrop-blur-md border-stone-200 border-b sticky top-0 z-50">
+ <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+ <div class="flex items-center gap-x-2 sm:gap-x-3">
+ <div
+ class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-lg sm:rounded-xl flex items-center justify-center text-white text-sm sm:text-xl font-bold shadow-lg shadow-emerald-600/20">
+ 📸</div>
+ <span class="text-lg sm:text-2xl font-bold tracking-tight heading text-stone-800">TidySnap</span>
+ </div>
+ <button onclick="document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' })"
+ class="btn-primary btn-glow px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base text-white font-semibold rounded-lg sm:rounded-xl transition">
+ Join Waitlist
+ </button>
+ </div>
+ </nav>
+
+ <!-- HERO -->
+ <section class="hero-bg text-white pt-12 sm:pt-20 pb-12 sm:pb-16 relative overflow-hidden">
+ <div class="absolute inset-0 opacity-20">
+ <div class="absolute top-10 sm:top-20 left-5 sm:left-10 w-48 sm:w-72 h-48 sm:h-72 bg-white/10 rounded-full blur-2xl sm:blur-3xl"></div>
+ <div class="absolute bottom-5 sm:bottom-10 right-5 sm:right-20 w-56 sm:w-96 h-56 sm:h-96 bg-emerald-300/20 rounded-full blur-2xl sm:blur-3xl"></div>
+ </div>
+ <div class="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
+ <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+ <div class="text-center md:text-left">
+ <div
+ class="inline-flex items-center gap-x-2 sm:gap-x-3 bg-white/10 backdrop-blur-md px-4 sm:px-6 py-2 sm:py-3 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-6 border border-white/20">
+ <span class="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-emerald-300 rounded-full animate-pulse"></span>
+ <span>Beta April 2026</span>
+ <span class="mx-1 sm:mx-2 text-white/40 hidden sm:inline">|</span>
+ <span class="text-emerald-200 hidden sm:inline">First 5,000 get lifetime 50% off</span>
+ </div>
+ <h1 class="heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-4 sm:mb-6">
+ Snap the mess.<br>
+ <span class="text-emerald-200">Get the perfect plan.</span>
+ </h1>
+ <p class="text-base sm:text-lg md:text-xl text-white/80 leading-relaxed mb-6 sm:mb-8 px-2 sm:px-0">
+ One photo of your messy desk → AI instantly marks exactly where everything should go.
+ </p>
+ <button onclick="document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' })"
+ class="btn-primary btn-glow px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-lg font-semibold rounded-xl shadow-2xl flex items-center justify-center gap-x-2 sm:gap-x-3 bounce-subtle w-full sm:w-auto">
+ Join the Waitlist Now
+ <i class="fa-solid fa-arrow-right"></i>
+ </button>
+ </div>
+ <div class="mt-6 sm:mt-8 md:mt-0 px-2 sm:px-0">
+ <img src="hero.png" alt="TidySnap Demo" 
+ class="rounded-xl sm:rounded-2xl shadow-2xl w-full border-4 border-white/20">
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- STATS & SOCIAL PROOF -->
+ <section class="py-8 sm:py-12 bg-white border-b border-stone-100">
+ <div class="max-w-6xl mx-auto px-4 sm:px-6">
+ <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 text-center">
+ <div>
+ <div class="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-800 heading">12,847</div>
+ <div class="text-stone-500 text-xs sm:text-sm mt-1">Desks Organized</div>
+ </div>
+ <div>
+ <div class="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-800 heading">4.9/5</div>
+ <div class="text-stone-500 text-xs sm:text-sm mt-1 flex items-center justify-center gap-1">
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ </div>
+ </div>
+ <div>
+ <div class="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-800 heading">98%</div>
+ <div class="text-stone-500 text-xs sm:text-sm mt-1">Satisfaction Rate</div>
+ </div>
+ <div>
+ <div class="text-2xl sm:text-3xl md:text-4xl font-bold text-stone-800 heading">50+</div>
+ <div class="text-stone-500 text-xs sm:text-sm mt-1">Countries</div>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- TESTIMONIALS -->
+ <section class="py-12 sm:py-20 bg-stone-50">
+ <div class="max-w-6xl mx-auto px-4 sm:px-6">
+ <h2 class="heading text-2xl sm:text-3xl md:text-4xl font-semibold text-center text-stone-800 mb-3 sm:mb-4">Loved by remote workers everywhere</h2>
+ <p class="text-stone-500 text-center mb-8 sm:mb-12 text-sm sm:text-base">Join thousands who've already transformed their workspace</p>
+ 
+ <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+ <div class="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 shadow-sm border border-stone-100">
+ <div class="flex gap-1 mb-3 sm:mb-4">
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ </div>
+ <p class="text-stone-600 mb-3 sm:mb-4 text-sm">"As someone who's constantly messy, this app is a lifesaver. My desk has never looked better!"</p>
+ <div class="flex items-center gap-3">
+ <div class="w-8 h-8 sm:w-10 sm:h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 font-bold">S</div>
+ <div>
+ <div class="font-semibold text-stone-800 text-sm">Sarah K.</div>
+ <div class="text-xs text-stone-400">Product Designer</div>
+ </div>
+ </div>
+ </div>
+ 
+ <div class="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 shadow-sm border border-stone-100">
+ <div class="flex gap-1 mb-3 sm:mb-4">
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ </div>
+ <p class="text-stone-600 mb-3 sm:mb-4 text-sm">"The arrows and labels make it so easy to follow. Even my kids can help organize now!"</p>
+ <div class="flex items-center gap-3">
+ <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold">M</div>
+ <div>
+ <div class="font-semibold text-stone-800 text-sm">Mike T.</div>
+ <div class="text-xs text-stone-400">Software Engineer</div>
+ </div>
+ </div>
+ </div>
+ 
+ <div class="bg-white rounded-xl sm:rounded-2xl p-5 sm:p-6 shadow-sm border border-stone-100">
+ <div class="flex gap-1 mb-3 sm:mb-4">
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ <i class="fa-solid fa-star text-yellow-400 text-xs sm:text-sm"></i>
+ </div>
+ <p class="text-stone-600 mb-3 sm:mb-4 text-sm">"Finally, a productivity tool that actually works. The AI suggestions are spot on."</p>
+ <div class="flex items-center gap-3">
+ <div class="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">J</div>
+ <div>
+ <div class="font-semibold text-stone-800 text-sm">Jenny L.</div>
+ <div class="text-xs text-stone-400">Content Writer</div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- TRUST BADGES -->
+ <section class="py-8 sm:py-12 bg-white">
+ <div class="max-w-4xl mx-auto px-6 text-center">
+ <p class="text-stone-400 text-sm mb-8">Trusted by teams at • Privacy secured • Data encrypted</p>
+ <div class="flex flex-wrap justify-center items-center gap-4 sm:gap-8 text-stone-300">
+ <div class="flex items-center gap-2">
+ <i class="fa-solid fa-shield-halved text-xl"></i>
+ <span class="text-sm font-medium">256-bit Encryption</span>
+ </div>
+ <div class="flex items-center gap-2">
+ <i class="fa-solid fa-lock text-xl"></i>
+ <span class="text-sm font-medium">SOC 2 Certified</span>
+ </div>
+ <div class="flex items-center gap-2">
+ <i class="fa-solid fa-hand-sparkles text-xl"></i>
+ <span class="text-sm font-medium">GDPR Compliant</span>
+ </div>
+ <div class="flex items-center gap-2">
+ <i class="fa-solid fa-server text-xl"></i>
+ <span class="text-sm font-medium">AWS Hosted</span>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- HOW IT WORKS -->
+ <section id="how" class="py-12 sm:py-24 bg-stone-50">
+ <div class="max-w-6xl mx-auto px-6">
+ <div class="text-center mb-8 sm:mb-16">
+ <h2 class="heading text-3xl sm:text-4xl md:text-5xl font-semibold text-stone-800 mb-4">3 Steps • 30 Seconds</h2>
+ <p class="text-stone-500 text-base sm:text-lg">From chaos to clarity in seconds</p>
+ </div>
+ <div class="grid md:grid-cols-3 gap-6">
+ <div class="snap-card bg-white border border-stone-100 rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center shadow-sm">
+ <div
+ class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl mx-auto flex items-center justify-center text-3xl mb-5 shadow-lg shadow-emerald-500/20">
+ 📸</div>
+ <h3 class="text-xl font-semibold mb-3 text-stone-800">1. Snap a photo</h3>
+ <p class="text-stone-500">Your messy desk — just take one picture.</p>
+ </div>
+ <div class="snap-card bg-white border border-stone-100 rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center shadow-sm">
+ <div
+ class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl mx-auto flex items-center justify-center text-3xl mb-5 shadow-lg shadow-emerald-500/20">
+ 🧠</div>
+ <h3 class="text-xl font-semibold mb-3 text-stone-800">2. AI analyzes</h3>
+ <p class="text-stone-500">Identifies every item and plans the perfect layout.</p>
+ </div>
+ <div class="snap-card bg-white border border-stone-100 rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center shadow-sm">
+ <div
+ class="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl mx-auto flex items-center justify-center text-3xl mb-5 shadow-lg shadow-emerald-500/20">
+ ✨</div>
+ <h3 class="text-xl font-semibold mb-3 text-stone-800">3. Get your plan</h3>
+ <p class="text-stone-500">Download the photo with arrows and labels.</p>
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- BEFORE / AFTER EXAMPLES -->
+ <section id="examples" class="py-12 sm:py-24 bg-stone-100">
+ <div class="max-w-6xl mx-auto px-6">
+ <h2 class="heading text-3xl sm:text-4xl md:text-5xl font-semibold text-center mb-8 sm:mb-12 text-stone-800">Real Desk Transformations</h2>
+
+ <div class="grid md:grid-cols-2 gap-6 sm:gap-8">
+ <!-- Before -->
+ <div>
+ <p class="text-center text-sm text-red-600 font-medium mb-3">BEFORE — Messy Desk</p>
+ <img id="before-img" src="before.png" alt="Messy desk before"
+ class="rounded-2xl shadow-xl w-full border border-stone-200">
+ </div>
+
+ <!-- After -->
+ <div>
+ <p class="text-center text-sm text-emerald-600 font-medium mb-3">AFTER + AI MARKERS</p>
+ <img id="after-img" src="after.png" alt="Tidy desk after with AI arrows"
+ class="rounded-2xl shadow-xl w-full border border-emerald-200">
+ </div>
+ </div>
+ </div>
+ </section>
+
+ <!-- FEATURES -->
+ <section id="features" class="py-12 sm:py-24 bg-white">
+ <div class="max-w-6xl mx-auto px-6">
+ <div class="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+ <div>
+ <h2 class="heading text-3xl sm:text-4xl md:text-5xl font-semibold leading-tight text-stone-800 mb-6">Visual instructions,<br><span class="gradient-text">not just advice.</span>
+ </h2>
+ <ul class="mt-6 sm:mt-8 space-y-4 sm:space-y-6 text-base sm:text-lg">
+ <li class="flex gap-3 sm:gap-4 items-start"><div class="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-sm mt-1 flex-shrink-0"><i class="fa-solid fa-check"></i></div>
+ <div class="text-stone-600"><strong class="text-stone-800">Item-by-item arrows</strong><br>Pens, cables, mug — every item labeled.</div>
+ </li>
+ <li class="flex gap-3 sm:gap-4 items-start"><div class="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-sm mt-1 flex-shrink-0"><i class="fa-solid fa-check"></i></div>
+ <div class="text-stone-600"><strong class="text-stone-800">Smart layout</strong><br>Based on usage frequency & ergonomics.</div>
+ </li>
+ <li class="flex gap-3 sm:gap-4 items-start"><div class="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-sm mt-1 flex-shrink-0"><i class="fa-solid fa-check"></i></div>
+ <div class="text-stone-600"><strong class="text-stone-800">Works on any desk</strong><br>Remote workers, students, home office.</div>
+ </li>
+ </ul>
+ </div>
+ <img id="feature-img" src="visual.png" alt="AI output demo" class="w-40 sm:w-48 md:w-56 lg:w-64 mx-auto rounded-2xl shadow-xl">
+ </div>
+ </div>
+ </section>
+
+ <!-- WAITLIST CTA -->
+ <section id="waitlist" class="py-12 sm:py-24 bg-gradient-to-br from-stone-800 to-stone-900 text-white">
+ <div class="max-w-2xl mx-auto px-4 sm:px-6 text-center">
+ <div class="inline-flex items-center gap-2 sm:gap-3 bg-red-500/90 hover:bg-red-500 px-6 py-3 sm:px-8 sm:py-4 rounded-xl sm:rounded-2xl text-base sm:text-lg font-bold mb-8 shadow-2xl shadow-red-500/50 animate-pulse">
+ <span class="text-2xl sm:text-3xl">🔥</span>
+ <span>Only <span id="countdown" class="countdown text-3xl sm:text-4xl text-yellow-200">4,872</span> early spots left</span>
+ </div>
+ <h2 class="heading text-3xl sm:text-4xl md:text-5xl font-semibold mb-4">Be the first to tidy your desk</h2>
+ <p class="text-base sm:text-xl text-stone-300 mb-10">Beta opens April 2026.<br>First 5,000 members get lifetime 50% discount.</p>
+
+ <!-- Tally Form Embed -->
+ <div class="max-w-sm sm:max-w-md mx-auto bg-white rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-2xl">
+ <iframe data-tally-src="https://tally.so/embed/2EkojM?alignLeft=1&hideTitle=1&dynamicHeight=1" loading="lazy" width="100%" height="277" frameborder="0" marginheight="0" marginwidth="0" title="waitList"></iframe>
+ <script>var d=document,w="https://tally.so/widgets/embed.js",v=function(){"undefined"!=typeof Tally?Tally.loadEmbeds():d.querySelectorAll("iframe[data-tally-src]:not([src])").forEach((function(e){e.src=e.dataset.tallySrc}))};if("undefined"!=typeof Tally)v();else if(d.querySelector('script[src="'+w+'"]')==null){var s=d.createElement("script");s.src=w,s.onload=v,s.onerror=v,d.body.appendChild(s);}</script>
+ </div>
+ </div>
+ </section>
+
+ <!-- FOOTER -->
+ <footer class="bg-stone-950 text-white py-8 sm:py-12">
+ <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+ <div class="flex justify-center mb-6">
+ <div class="flex items-center gap-x-3">
+ <div
+ class="w-10 h-10 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-600/20">
+ 📸</div>
+ <span class="text-2xl font-bold tracking-tight heading">TidySnap</span>
+ </div>
+ </div>
+ <p class="text-stone-400">One photo. Perfect desk. Forever.</p>
+ <p class="text-xs text-stone-600 mt-8">© 2026 TidySnap AI</p>
+ </div>
+ </footer>
+
+ <!-- GA4 + Form Script -->
+ <script>
+ // === 替换成你的 GA4 ID ===
+ window.dataLayer = window.dataLayer || [];
+ function gtag() { dataLayer.push(arguments); }
+ gtag('js', new Date());
+ gtag('config', 'G-XXXXXXXXXX');
+
+ function validateEmail(email) {
+ const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+ return re.test(email);
+ }
+
+ function showEmailError(show) {
+ const errorEl = document.getElementById('email-error');
+ const emailInput = document.getElementById('email');
+ const emailIcon = document.getElementById('email-icon');
+ if (show) {
+ errorEl.classList.remove('hidden');
+ errorEl.classList.add('flex');
+ emailInput.classList.add('border-red-300', 'focus:ring-red-300');
+ emailInput.classList.remove('focus:ring-emerald-400');
+ if (emailIcon) {
+ emailIcon.classList.remove('text-stone-300');
+ emailIcon.classList.add('text-red-400');
+ }
+ } else {
+ errorEl.classList.add('hidden');
+ errorEl.classList.remove('flex');
+ emailInput.classList.remove('border-red-300', 'focus:ring-red-300');
+ emailInput.classList.add('focus:ring-emerald-400');
+ if (emailIcon) {
+ emailIcon.classList.add('text-stone-300');
+ emailIcon.classList.remove('text-red-400');
+ }
+ }
+ }
+
+ // Real-time email validation
+ document.getElementById('email').addEventListener('input', function() {
+ if (this.value && !validateEmail(this.value)) {
+ showEmailError(true);
+ } else {
+ showEmailError(false);
+ }
+ });
+
+ function submitWaitlist(e) {
+ e.preventDefault();
+ const email = document.getElementById('email').value;
+ const name = document.getElementById('name').value;
+ const form = document.getElementById('waitlistForm');
+ const btn = form.querySelector('button[type="submit"]');
+ 
+ if (!email || !validateEmail(email)) {
+ showEmailError(true);
+ return;
+ }
+
+ // Show loading state
+ btn.disabled = true;
+ btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Joining...';
+ 
+ // Simulate API call
+ setTimeout(() => {
+ // GA4 转化事件
+ gtag('event', 'waitlist_signup', { value: 1 });
+ 
+ // Show success
+ form.innerHTML = `
+ <div class="success-checkmark text-center py-8 relative">
+ <button onclick="this.closest('form').reset(); location.reload()" class="absolute top-0 right-0 w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center text-stone-400 hover:text-stone-600 transition">
+ <i class="fa-solid fa-xmark"></i>
+ </button>
+ <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+ <i class="fa-solid fa-check text-4xl text-emerald-600"></i>
+ </div>
+ <h3 class="text-2xl font-bold text-stone-800 mb-2">You're on the list!</h3>
+ <p class="text-stone-500">We'll notify you when beta opens.</p>
+ </div>
+ `;
+ }, 800);
+ }
+
+ // 简单倒计时（示例）
+ let spots = 4872;
+ setInterval(() => {
+ if (spots > 4200) {
+ spots -= Math.floor(Math.random() * 3) + 1;
+ document.getElementById('countdown').textContent = spots;
+ }
+ }, 8000);
+ </script>
+</body>
+
+</html>
