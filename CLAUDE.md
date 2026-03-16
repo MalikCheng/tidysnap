@@ -38,3 +38,11 @@ Blog posts are defined in `src/content.config.ts` with:
 - `heroImage` (optional)
 - `tags` (array)
 - `author` (default: 'TidySnap Team')
+
+## Environment
+
+- **Domain**: https://tidysnap.homes/
+- **GitHub CLI**: Logged in
+- **Vercel CLI**: Logged in (deploys from main branch)
+- **Stripe CLI**: Logged in
+- **API Keys**: Gemini Nano Banana API key stored in `.enc.local` (also available in production)
