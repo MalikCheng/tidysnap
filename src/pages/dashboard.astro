@@ -1,0 +1,140 @@
+---
+// Dashboard Page - User subscription management
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - TidySnap</title>
+  <meta name="description" content="Manage your TidySnap subscription">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-bg: #FAFAF9;
+      --color-surface: #FFFFFF;
+      --color-text: #1C1917;
+      --color-accent: #059669;
+    }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--color-bg);
+    }
+    .heading { font-family: 'Sora', sans-serif; }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+        <a href="/" class="heading text-2xl font-bold text-emerald-600">TidySnap</a>
+        <nav class="flex gap-4">
+          <a href="/try" class="text-gray-600 hover:text-emerald-600">Try Now</a>
+          <a href="/dashboard" class="text-emerald-600 font-medium">Dashboard</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 py-12">
+      <h1 class="heading text-3xl font-bold mb-8">Your Dashboard</h1>
+      
+      <!-- Subscription Status -->
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4">Subscription Status</h2>
+        <div id="subscription-status">
+          <div class="animate-pulse">
+            <div class="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+            <div class="h-8 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing CTA -->
+      <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl p-8 text-white mb-8">
+        <h2 class="heading text-2xl font-bold mb-2">Upgrade to Lifetime Access</h2>
+        <p class="mb-4 opacity-90">Get unlimited AI desk organization plans forever!</p>
+        <div class="flex items-baseline gap-2 mb-6">
+          <span class="text-4xl font-bold">$49.99</span>
+          <span class="text-lg opacity-75 line-through">$99.99</span>
+          <span class="bg-white text-emerald-600 px-2 py-1 rounded-full text-sm font-medium">50% OFF</span>
+        </div>
+        <button id="upgrade-btn" class="bg-white text-emerald-600 px-6 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition">
+          Upgrade Now
+        </button>
+      </div>
+
+      <!-- Usage Stats -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold mb-4">Your Usage</h2>
+        <div id="usage-stats">
+          <p class="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Check subscription status
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/subscription');
+        const data = await res.json();
+        
+        const statusEl = document.getElementById('subscription-status');
+        const usageEl = document.getElementById('usage-stats');
+        
+        if (data.loggedIn) {
+          const user = data.user;
+          const isLifetime = user.subscription === 'lifetime';
+          
+          statusEl.innerHTML = isLifetime 
+            ? '<span class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full font-medium"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> Lifetime Member</span>'
+            : '<span class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full font-medium">Free Plan</span>';
+          
+          usageEl.innerHTML = `
+            <div class="grid grid-cols-2 gap-4">
+              <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="text-sm text-gray-600">Analyses Used</p>
+                <p class="text-2xl font-bold">${user.analysisCount || 0}</p>
+              </div>
+              <div class="p-4 bg-gray-50 rounded-lg">
+                <p class="text-sm text-gray-600">Plan</p>
+                <p class="text-2xl font-bold">${isLifetime ? 'Unlimited' : '1/day'}</p>
+              </div>
+            </div>
+          `;
+        } else {
+          statusEl.innerHTML = '<p class="text-gray-600">Please <a href="/try" class="text-emerald-600 hover:underline">sign in</a> to view your subscription.</p>';
+          usageEl.innerHTML = '';
+        }
+      } catch (err) {
+        console.error('Failed to load dashboard:', err);
+      }
+    }
+
+    // Upgrade button
+    document.getElementById('upgrade-btn')?.addEventListener('click', async () => {
+      const email = prompt('Please enter your email:');
+      if (!email) return;
+      
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        body: new FormData().append('email', email)
+      });
+      
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
+      }
+    });
+
+    loadDashboard();
+  </script>
+</body>
+</html>

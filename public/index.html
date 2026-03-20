@@ -17,6 +17,83 @@
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>TidySnap — Snap Once. Tidy Forever.</title>
  <meta name="theme-color" content="#059669">
+ <meta name="description" content="Upload your messy desk photo and get AI-generated tidy plan with arrows. Organize your workspace in minutes with TidySnap AI.">
+ <meta name="keywords" content="desk organizer, AI desk organization, tidy desk, office organization, workspace organization, home office, declutter, desk organization ideas">
+ 
+ <!-- Open Graph -->
+ <meta property="og:title" content="TidySnap — Snap Once. Tidy Forever.">
+ <meta property="og:description" content="AI-powered desk organization. Upload your messy desk and get a personalized tidy plan with arrows.">
+ <meta property="og:type" content="website">
+ <meta property="og:url" content="https://tidysnap.homes/">
+ <meta property="og:image" content="https://tidysnap.homes/hero.png">
+ <meta property="og:site_name" content="TidySnap">
+ 
+ <!-- Twitter Card -->
+ <meta name="twitter:card" content="summary_large_image">
+ <meta name="twitter:title" content="TidySnap — Snap Once. Tidy Forever.">
+ <meta name="twitter:description" content="AI-powered desk organization. Upload your messy desk and get a personalized tidy plan with arrows.">
+ <meta name="twitter:image" content="https://tidysnap.homes/hero.png">
+ 
+ <!-- Structured Data - Product -->
+ <script type="application/ld+json">
+ {
+   "@context": "https://schema.org",
+   "@type": "WebApplication",
+   "name": "TidySnap",
+   "description": "AI-powered desk organization tool that generates tidy plans with arrows from photos of messy desks",
+   "url": "https://tidysnap.homes",
+   "applicationCategory": "UtilitiesApplication",
+   "operatingSystem": "Web Browser",
+   "offers": {
+     "@type": "Offer",
+     "price": "49.99",
+     "priceCurrency": "USD",
+     "availability": "https://schema.org/InStock",
+     "description": "Lifetime access with 50% off"
+   },
+   "featureList": [
+     "AI-powered desk analysis",
+     "Personalized tidy plans with arrows",
+     "Unlimited downloads",
+     "Before/after comparison"
+   ]
+ }
+ </script>
+ 
+ <!-- Structured Data - FAQPage -->
+ <script type="application/ld+json">
+ {
+   "@context": "https://schema.org",
+   "@type": "FAQPage",
+   "mainEntity": [
+     {
+       "@type": "Question",
+       "name": "How does TidySnap work?",
+       "acceptedAnswer": {
+         "@type": "Answer",
+         "text": "Simply upload a photo of your messy desk, and our AI will analyze it and generate a tidy plan showing exactly where each item should go with helpful arrows."
+       }
+     },
+     {
+       "@type": "Question",
+       "name": "Is TidySnap free to use?",
+       "acceptedAnswer": {
+         "@type": "Answer",
+         "text": "TidySnap offers 1 free analysis. For unlimited access, upgrade to our lifetime plan for just $49.99 (50% off)."
+       }
+     },
+     {
+       "@type": "Question",
+       "name": "What type of desks work best?",
+       "acceptedAnswer": {
+         "@type": "Answer",
+         "text": "TidySnap works best with photos of messy desks, workbenches, home office setups, and any cluttered workspace. The clearer the photo, the better the results."
+       }
+     }
+   ]
+ }
+ </script>
+ 
  <link rel="icon" href="favicon.svg" type="image/svg+xml">
  <script src="https://cdn.tailwindcss.com"></script>
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -158,8 +235,12 @@
  <p class="text-base sm:text-lg md:text-xl text-white/80 leading-relaxed mb-6 sm:mb-8 px-2 sm:px-0">
  One photo of your messy desk → AI instantly marks exactly where everything should go.
  </p>
- <button onclick="document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' })"
+ <button onclick="window.location.href='/try'"
  class="btn-primary btn-glow px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-lg font-semibold rounded-xl shadow-2xl flex items-center justify-center gap-x-2 sm:gap-x-3 bounce-subtle w-full sm:w-auto">
+ Try Now - It's Free! 🚀
+ </button>
+ <button onclick="document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' })"
+ class="btn-primary btn-glow px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-lg font-semibold rounded-xl shadow-2xl flex items-center justify-center gap-x-2 sm:gap-x-3 bounce-subtle w-full sm:w-auto ml-3">
  Join the Waitlist Now
  <i class="fa-solid fa-arrow-right"></i>
  </button>

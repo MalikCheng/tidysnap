@@ -1,0 +1,26 @@
+---
+// Index page - serves the marketing site
+export const prerender = false;
+import { readFile } from 'fs/promises';
+import { join } from 'path';
+
+let indexHtml = '';
+
+try {
+  indexHtml = await readFile(join(process.cwd(), 'public', 'index.html'), 'utf-8');
+} catch (e) {
+  indexHtml = '<html><body><p>Loading...</p></body></html>';
+}
+---
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TidySnap — Snap Once. Tidy Forever.</title>
+  <meta name="description" content="Upload your messy desk photo and get AI-generated tidy plan with arrows">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+</head>
+<body set:html={indexHtml}></body>
+</html>

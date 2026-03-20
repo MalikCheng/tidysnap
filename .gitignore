@@ -13,6 +13,7 @@ dist/
 # Environment
 .env
 .env*.local
+.env_doc/
 
 # IDE
 .vscode/
