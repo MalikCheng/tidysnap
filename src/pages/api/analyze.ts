@@ -87,10 +87,7 @@ async function analyzeWithNanaBanana(
   mimeType: string
 ): Promise<{ text: string; imageData?: string }> {
   const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash-exp',
-    generationConfig: {
-      responseModalities: ['text', 'image'],
-    },
+    model: 'gemini-3.1-flash-image-preview',
   });
 
   // Enhanced prompt for generating annotated tidy plan
