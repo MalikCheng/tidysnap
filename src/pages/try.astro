@@ -672,6 +672,11 @@
       if (planContainer) planContainer.classList.remove('zoomed');
     }
 
+    // Expose functions to window for inline onclick handlers
+    window.closeAuthModal = closeAuthModal;
+    window.closeUpgradePrompt = closeUpgradePrompt;
+    window.resetUpload = resetUpload;
+
     // Zoom functionality
     const planContainer = document.getElementById('plan-container');
     const zoomBtn = document.getElementById('zoom-btn');
