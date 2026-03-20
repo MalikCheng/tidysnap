@@ -8,8 +8,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import sharp from 'sharp';
 
 // Initialize Gemini with the Nana Banana API key
+// Key in .env.local: Gemini_NANA_Banana_API_KEY
 const genAI = new GoogleGenerativeAI(
-  import.meta.env.GEMINI_NANA_BANANA_API_KEY || 'AIzaSyA0a1Ez0M-0wJyfhdkVDnRsP3XJPjxFCCg'
+  import.meta.env.Gemini_NANA_Banana_API_KEY || import.meta.env.GEMINI_NANA_BANANA_API_KEY || 'AIzaSyA0a1Ez0M-0wJyfhdkVDnRsP3XJPjxFCCg'
 );
 
 // Configuration
