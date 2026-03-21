@@ -3,28 +3,38 @@
 
 export const prerender = false;
 
+import {
+  getUserFromSession,
+  getCookieValue,
+} from './auth.shared';
+
 export async function GET({ request }) {
-  // Get session cookie
   const cookie = request.headers.get('cookie') || '';
-  const match = cookie.match(/(?:^| )session=([^;]+)/);
-  
-  if (!match) {
+  const sessionId = getCookieValue(cookie, 'session');
+
+  if (!sessionId) {
     return new Response(JSON.stringify({ loggedIn: false }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  // TODO: Look up user in database using session
-  // For now, return mock data
-  
-  return new Response(JSON.stringify({ 
-    loggedIn: true,
-    user: {
-      email: 'user@example.com',
-      subscription: 'lifetime',
-      analysisCount: 5
-    }
-  }), {
-    headers: { 'Content-Type': 'application/json' }
-  });
+  const user = getUserFromSession(sessionId);
+
+  if (!user) {
+    return new Response(JSON.stringify({ loggedIn: false }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  return new Response(
+    JSON.stringify({
+      loggedIn: true,
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+        analysisCount: user.analysisCount,
+      },
+    }),
+    { headers: { 'Content-Type': 'application/json' } }
+  );
 }

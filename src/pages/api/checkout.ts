@@ -6,23 +6,44 @@ export const prerender = false;
 import Stripe from 'stripe';
 
 // Initialize Stripe
-const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
-  apiVersion: '2025-01-27.acacia'
-});
+const stripeSecretKey = import.meta.env.STRIPE_SECRET_KEY;
+const PRICE_ID = import.meta.env.STRIPE_PRICE_ID;
 
-const PRICE_ID = import.meta.env.STRIPE_PRICE_ID || 'price_placeholder';
+if (!stripeSecretKey || stripeSecretKey === 'sk_test_placeholder') {
+  console.warn('[Checkout] STRIPE_SECRET_KEY not configured — checkout will return error');
+}
 
 export async function POST({ request, url }) {
   try {
     const formData = await request.formData();
     const email = formData.get('email')?.toString();
-    
+
     if (!email) {
       return new Response(JSON.stringify({ error: 'Email required' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
     }
+
+    if (!stripeSecretKey || stripeSecretKey === 'sk_test_placeholder') {
+      return new Response(
+        JSON.stringify({
+          error: 'Stripe is not configured yet. Please contact support to complete your purchase.',
+        }),
+        { status: 503, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!PRICE_ID || PRICE_ID === 'price_placeholder') {
+      return new Response(
+        JSON.stringify({
+          error: 'Product pricing not configured yet. Please contact support to complete your purchase.',
+        }),
+        { status: 503, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2025-01-27.acacia' });
 
     // Create Stripe Checkout session for lifetime subscription
     const session = await stripe.checkout.sessions.create({
@@ -34,8 +55,8 @@ export async function POST({ request, url }) {
         },
       ],
       mode: 'payment', // One-time payment for lifetime
-      success_url: `${url.origin}/dashboard?success=true`,
-      cancel_url: `${url.origin}/dashboard?canceled=true`,
+      success_url: `${url.origin}/try?checkout=success`,
+      cancel_url: `${url.origin}/try?checkout=canceled`,
       customer_email: email,
       metadata: {
         type: 'lifetime_subscription',

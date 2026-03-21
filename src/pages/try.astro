@@ -7,8 +7,33 @@ import '../styles/global.css';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Try TidySnap - Snap Once. Tidy Forever.</title>
-  <meta name="description" content="Upload your messy desk photo and get AI-generated tidy plan with arrows">
+  <title>Try TidySnap — AI Desk Organization in Seconds | Free</title>
+  <meta name="description" content="Upload a photo of your messy desk and get an AI-generated tidy plan with arrows showing exactly where every item belongs. Free to try, no signup required.">
+  <meta name="keywords" content="AI desk organizer, tidy messy desk AI, desk organization app, workspace organizer, messy desk photo, AI organization tool, desk tidy plan">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="TidySnap">
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://tidysnap.homes/try">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tidysnap.homes/try">
+  <meta property="og:title" content="Try TidySnap — AI Desk Organization in Seconds">
+  <meta property="og:description" content="Upload your messy desk photo and get AI-generated tidy plan with arrows. Free to try.">
+  <meta property="og:image" content="https://tidysnap.homes/hero.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="TidySnap">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Try TidySnap — AI Desk Organization in Seconds">
+  <meta name="twitter:description" content="Upload your messy desk photo and get AI-generated tidy plan with arrows.">
+  <meta name="twitter:image" content="https://tidysnap.homes/hero.png">
+
+  <!-- Additional SEO -->
+  <meta name="theme-color" content="#059669">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -320,6 +345,76 @@ import '../styles/global.css';
       50% { opacity: 1; transform: scale(1.05); }
     }
 
+    /* ── Loading Progress Bar ─────────────────────── */
+    .loading-progress-track {
+      width: 200px;
+      height: 4px;
+      background: var(--stone-200);
+      border-radius: 99px;
+      overflow: hidden;
+      margin: 0 auto 20px;
+    }
+    .loading-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--emerald-400), var(--emerald-600));
+      border-radius: 99px;
+      animation: progress-move 2.5s ease-in-out infinite;
+    }
+    @keyframes progress-move {
+      0% { width: 0%; margin-left: 0; }
+      50% { width: 70%; margin-left: 15%; }
+      100% { width: 0%; margin-left: 100%; }
+    }
+
+    /* ── Step Indicators ──────────────────────────── */
+    .loading-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .loading-step {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    .loading-step.active {
+      background: var(--emerald-100);
+      color: var(--emerald-700);
+    }
+    .loading-step.pending {
+      background: var(--stone-100);
+      color: var(--stone-400);
+    }
+    .loading-step.done {
+      background: var(--emerald-50);
+      color: var(--emerald-600);
+    }
+    .loading-step .step-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .loading-step.active .step-dot {
+      animation: pulse-dot 1s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+    .loading-step-sep {
+      color: var(--stone-300);
+      font-size: 10px;
+    }
+
     /* ── Image Preview ──────────────────────────── */
     .image-frame {
       border-radius: 16px;
@@ -550,7 +645,7 @@ import '../styles/global.css';
         </svg>
         Choose Photo
       </button>
-      <input type="file" id="file-input" accept="image/*" class="hidden">
+      <input type="file" id="file-input" accept="image/*" capture="environment" class="hidden">
     </div>
 
     <!-- ── LOADING STATE ──────────────────────── -->
@@ -559,13 +654,38 @@ import '../styles/global.css';
         <div class="ring"></div>
         <div class="ring"></div>
         <div class="ring"></div>
-        <div class="icon">🧠</div>
+        <div class="icon" id="loading-icon">🧠</div>
       </div>
-      <h3 class="heading text-2xl font-bold text-stone-800 mb-2">AI is analyzing your desk…</h3>
-      <p class="text-stone-400 mb-6">Detecting items and planning the perfect tidy route</p>
-      <div class="loading-orbs justify-center">
-        <span></span><span></span><span></span>
+
+      <!-- Step indicators -->
+      <div class="loading-steps" id="loading-steps">
+        <div class="loading-step active" id="step-1">
+          <span class="step-dot"></span>
+          <span>📸 Detecting items</span>
+        </div>
+        <span class="loading-step-sep">›</span>
+        <div class="loading-step pending" id="step-2">
+          <span class="step-dot"></span>
+          <span>🗺️ Planning route</span>
+        </div>
+        <span class="loading-step-sep">›</span>
+        <div class="loading-step pending" id="step-3">
+          <span class="step-dot"></span>
+          <span>✨ Drawing arrows</span>
+        </div>
       </div>
+
+      <!-- Progress bar -->
+      <div class="loading-progress-track">
+        <div class="loading-progress-fill"></div>
+      </div>
+
+      <!-- Dynamic status text -->
+      <h3 class="heading text-2xl font-bold text-stone-800 mb-2" id="loading-title">Analyzing your desk…</h3>
+      <p class="text-stone-400 mb-4" id="loading-subtitle">Detecting items and planning the perfect tidy route</p>
+
+      <!-- Time estimate -->
+      <p class="text-stone-300 text-xs">Usually takes 10–30 seconds</p>
     </div>
 
     <!-- ── ERROR STATE ───────────────────────── -->
@@ -828,6 +948,70 @@ import '../styles/global.css';
 
     const FREE_LIMIT = 1;
 
+    // ── Loading Phase Cycling ─────────────────────
+    const LOADING_PHASES = [
+      { step: 1, title: 'Analyzing your desk…', subtitle: 'Detecting items and planning the perfect tidy route', icon: '🧠' },
+      { step: 2, title: 'Planning tidy route…', subtitle: 'Calculating the best order to organize your items', icon: '🗺️' },
+      { step: 3, title: 'Drawing arrows…', subtitle: 'Generating your personalized tidy guide', icon: '✨' },
+    ];
+
+    let loadingPhaseTimer = null;
+    let currentPhase = 0;
+
+    function setLoadingStep(step) {
+      const icons = ['📸', '🗺️', '✨'];
+      const titles = [
+        'Analyzing your desk…',
+        'Planning tidy route…',
+        'Drawing arrows…',
+      ];
+      const subtitles = [
+        'Detecting items and planning the perfect tidy route',
+        'Calculating the best order to organize your items',
+        'Generating your personalized tidy guide',
+      ];
+
+      for (let i = 1; i <= 3; i++) {
+        const el = document.getElementById(`step-${i}`);
+        if (!el) continue;
+        el.classList.remove('active', 'pending', 'done');
+        if (i < step) el.classList.add('done');
+        else if (i === step) el.classList.add('active');
+        else el.classList.add('pending');
+      }
+
+      const iconEl = document.getElementById('loading-icon');
+      const titleEl = document.getElementById('loading-title');
+      const subtitleEl = document.getElementById('loading-subtitle');
+      if (iconEl) iconEl.textContent = icons[step - 1] || '🧠';
+      if (titleEl) titleEl.textContent = titles[step - 1] || 'Processing…';
+      if (subtitleEl) subtitleEl.textContent = subtitles[step - 1] || '';
+    }
+
+    function startLoadingPhases() {
+      currentPhase = 0;
+      setLoadingStep(1);
+
+      // Advance phases every 4 seconds
+      if (loadingPhaseTimer) clearInterval(loadingPhaseTimer);
+      loadingPhaseTimer = setInterval(() => {
+        currentPhase++;
+        if (currentPhase < 3) {
+          setLoadingStep(currentPhase + 1);
+        } else {
+          clearInterval(loadingPhaseTimer);
+        }
+      }, 4000);
+    }
+
+    function stopLoadingPhases() {
+      if (loadingPhaseTimer) {
+        clearInterval(loadingPhaseTimer);
+        loadingPhaseTimer = null;
+      }
+      currentPhase = 0;
+    }
+
     // ── Elements ───────────────────────────────
     const uploadZone  = document.getElementById('upload-zone');
     const fileInput   = document.getElementById('file-input');
@@ -1036,6 +1220,9 @@ import '../styles/global.css';
       errorEl.classList.add('hidden');
       resultEl.classList.add('hidden');
 
+      // Start phase cycling
+      startLoadingPhases();
+
       try {
         const formData = new FormData();
         formData.append('image', file);
@@ -1065,6 +1252,7 @@ import '../styles/global.css';
         analysisCount++;
         renderUserBadge();
 
+        stopLoadingPhases();
         loadingEl.classList.add('hidden');
         resultEl.classList.remove('hidden');
 
@@ -1145,6 +1333,29 @@ import '../styles/global.css';
     });
 
     // ── Init ───────────────────────────────────
+    // Handle post-Stripe checkout redirects
+    const params = new URLSearchParams(window.location.search);
+    const checkoutResult = params.get('checkout');
+
+    if (checkoutResult === 'success') {
+      // Clean URL immediately
+      window.history.replaceState({}, '', window.location.pathname);
+      // Re-check user status (webhook should have updated subscription)
+      await checkUserStatus();
+      renderUserBadge();
+      // Show success toast
+      const badge = document.getElementById('user-badge');
+      if (badge) {
+        badge.classList.remove('hidden');
+        const icon = document.getElementById('badge-icon');
+        const text = document.getElementById('badge-text');
+        icon.textContent = '⭐';
+        text.textContent = 'Lifetime Member · Unlimited';
+      }
+    } else if (checkoutResult === 'canceled') {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
     checkUserStatus();
   </script>
 
