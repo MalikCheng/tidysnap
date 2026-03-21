@@ -14,8 +14,9 @@
 
 const fs = require('fs');
 
-const HTML_PATH = '/Users/malik/clawd/code/tidysnap/public/index.html';
-const OUTPUT_PATH = '/Users/malik/clawd/code/tidysnap/public/css/tailwind-utilities.css';
+const path = require('path');
+const HTML_PATH = path.join(__dirname, '..', 'index.html');
+const OUTPUT_PATH = path.join(__dirname, 'tailwind-utilities.css');
 
 // ─── Tailwind class → CSS property map ───────────────────────────────────────
 

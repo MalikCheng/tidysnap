@@ -1,0 +1,140 @@
+---
+// Privacy Policy Page
+---
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — TidySnap</title>
+  <meta name="description" content="TidySnap privacy policy — how we handle your data">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --stone-50: #fafaf9;
+      --stone-100: #f5f5f4;
+      --stone-200: #e7e5e4;
+      --stone-400: #a8a29e;
+      --stone-600: #57534e;
+      --stone-800: #1c1917;
+      --emerald-600: #059669;
+    }
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--stone-50);
+      color: var(--stone-800);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.7;
+    }
+    .heading { font-family: 'Sora', sans-serif; }
+    .prose h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+      color: var(--stone-800);
+    }
+    .prose h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--stone-800);
+    }
+    .prose p { margin-bottom: 1rem; color: var(--stone-600); }
+    .prose ul { margin-bottom: 1rem; padding-left: 1.5rem; color: var(--stone-600); }
+    .prose li { margin-bottom: 0.5rem; }
+    .prose strong { color: var(--stone-800); }
+    .prose a { color: var(--emerald-600); text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <header class="bg-white border-b border-stone-100 sticky top-0 z-50">
+    <div class="max-w-3xl mx-auto px-5 py-4 flex justify-between items-center">
+      <a href="/" class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-700 flex items-center justify-center text-white font-bold heading text-base">📸</div>
+        <span class="text-lg font-bold heading text-stone-800">TidySnap</span>
+      </a>
+      <a href="/" class="text-sm text-stone-500 hover:text-emerald-600 transition-colors">← Back</a>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-5 py-16">
+    <div class="mb-10">
+      <h1 class="heading text-3xl font-extrabold text-stone-800 mb-3">Privacy Policy</h1>
+      <p class="text-stone-400 text-sm">Last updated: March 21, 2026</p>
+    </div>
+
+    <div class="prose bg-white rounded-2xl border border-stone-100 p-8 md:p-12 shadow-sm">
+
+      <h2>1. Information We Collect</h2>
+      <p>TidySnap is an AI-powered desk organization tool. We collect the following information:</p>
+      <ul>
+        <li><strong>Desk photos you upload</strong> — Images you voluntarily submit for AI analysis. These are processed in memory and not stored on our servers after analysis.</li>
+        <li><strong>Email address</strong> — Provided during account registration or Stripe checkout.</li>
+        <li><strong>Payment information</strong> — Handled entirely by <a href="https://stripe.com" target="_blank" rel="noopener">Stripe</a>. We never see or store your credit card number.</li>
+        <li><strong>Usage data</strong> — Number of analyses performed, for rate limiting and subscription management purposes.</li>
+      </ul>
+
+      <h2>2. How We Use Your Information</h2>
+      <p>We use collected information to:</p>
+      <ul>
+        <li>Provide AI-powered desk organization analysis</li>
+        <li>Manage your subscription (Free or Lifetime)</li>
+        <li>Send transactional emails related to your subscription</li>
+        <li>Improve our service and user experience</li>
+      </ul>
+
+      <h2>3. Data Retention</h2>
+      <p>Desk photos are <strong>not stored</strong> on our servers after analysis is complete. They are processed in memory and discarded immediately.</p>
+      <p>Your email and subscription status are retained for as long as your account is active. You may request deletion by emailing <a href="mailto:privacy@tidysnap.homes">privacy@tidysnap.homes</a>.</p>
+
+      <h2>4. Cookies</h2>
+      <p>We use minimal cookies for:</p>
+      <ul>
+        <li><strong>Session management</strong> — To keep you logged in (30-day session cookie, HttpOnly)</li>
+        <li><strong>Analytics</strong> — Google Analytics 4 for understanding site usage (anonymized)</li>
+      </ul>
+
+      <h2>5. Third-Party Services</h2>
+      <p>We use the following third-party services:</p>
+      <ul>
+        <li><a href="https://stripe.com" target="_blank" rel="noopener">Stripe</a> — Payment processing. Their <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Privacy Policy</a> applies.</li>
+        <li><a href="https://www.google.com/policies/privacy/" target="_blank" rel="noopener">Google Analytics</a> — Site analytics. Their privacy policy applies.</li>
+        <li><a href="https://ai.google.dev/privacy" target="_blank" rel="noopener">Google Gemini AI</a> — Image analysis. Images are sent to Google's AI for processing.</li>
+        <li><a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">Vercel</a> — Hosting and serverless functions.</li>
+      </ul>
+
+      <h2>6. Data Security</h2>
+      <p>We use industry-standard HTTPS encryption for all data in transit. Payment data is handled exclusively by Stripe's PCI-compliant infrastructure. Your desk photos are never stored on our servers.</p>
+
+      <h2>7. Your Rights</h2>
+      <p>Depending on your location, you may have the right to:</p>
+      <ul>
+        <li>Access the personal data we hold about you</li>
+        <li>Request correction of inaccurate data</li>
+        <li>Request deletion of your data</li>
+        <li>Object to processing of your data</li>
+      </ul>
+      <p>To exercise any of these rights, contact us at <a href="mailto:privacy@tidysnap.homes">privacy@tidysnap.homes</a>.</p>
+
+      <h2>8. Children's Privacy</h2>
+      <p>TidySnap is not intended for use by children under 13 years of age. We do not knowingly collect personal information from children under 13.</p>
+
+      <h2>9. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated "Last updated" date. We encourage you to review this page periodically.</p>
+
+      <h2>10. Contact Us</h2>
+      <p>If you have any questions about this Privacy Policy, please contact us:</p>
+      <ul>
+        <li>Email: <a href="mailto:privacy@tidysnap.homes">privacy@tidysnap.homes</a></li>
+        <li>Domain: tidysnap.homes</li>
+      </ul>
+
+    </div>
+  </main>
+
+</body>
+</html>

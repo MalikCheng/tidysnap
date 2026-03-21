@@ -164,29 +164,28 @@ ARROW COLORS:
 - 🔴 RED #EF4444 = items to remove/put away (discard or store elsewhere)
 - Add a small legend in the top-left corner: "🟢 Move | 🔴 Remove"
 
-ARROW STYLE (CRITICAL for visibility):
-- Stroke width: 10px (relative to image scale)
-- ALL arrows MUST have a 3-4px WHITE outer stroke (#FFFFFF) — this is non-negotiable for visibility on any background
-- Add a subtle dark drop shadow: 2px offset-y, 3px blur, #1E293B at 50% opacity
-- Arrow heads: filled triangles, 3x the stroke width
-- Curved paths preferred over straight lines
+ARROW STYLE (CRITICAL for visibility - SIMPLE and CLEAN):
+- Stroke width: 12px (thicker for clarity)
+- ALL arrows MUST have a 4-5px WHITE outer stroke (#FFFFFF) — non-negotiable
+- Add drop shadow: 3px offset-y, 4px blur, #000000 at 40% opacity
+- Arrow heads: filled triangles, 4x the stroke width
+- SIMPLE curved paths, no complex curves
 - lineCap and lineJoin: round
-- Maximum 10 arrows total (prevent visual clutter)
+- Maximum 5 arrows total — ONLY show the 5 MOST IMPORTANT items (prevent visual clutter)
 
-LABEL PILLS:
+LABEL PILLS (SIMPLE):
 - Background: #FFFFFF (pure white)
-- Border-radius: 8px
-- Text color: #0F172A (near black)
-- Font: bold sans-serif, 14px equivalent
-- Shadow: 0 2px 8px rgba(0,0,0,0.15)
-- Position: at the START of each arrow (near the item)
-- Short text only: "Trash", "Drawer", "Shelf", "Keep", "Donate", etc.
-- Keep labels ABOVE or BELOW arrows, never inline
+- Border-radius: 6px
+- Text color: #1C1917 (dark)
+- Font: bold sans-serif, 12px
+- Shadow: 0 2px 6px rgba(0,0,0,0.2)
+- Position: near the item, ABOVE or BELOW arrows
+- VERY SHORT text: "→Trash", "→Shelf", "→Drawer" (max 2 words)
 
-DESTINATION MARKERS:
-- Place bright ORANGE #F97316 circles at arrow endpoints (where items should go)
-- 20px diameter with 2px white border
-- Add subtle shadow: 0 2px 6px rgba(0,0,0,0.2)
+DESTINATION MARKERS (CLEAN):
+- Place bright ORANGE #F97316 circles at arrow endpoints
+- 16px diameter with 2px white border
+- Simple shadow only
 
 LAYOUT RULES:
 - Keep the original desk photo clearly visible underneath

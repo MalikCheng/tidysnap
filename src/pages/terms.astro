@@ -1,0 +1,143 @@
+---
+// Terms of Service Page
+---
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service — TidySnap</title>
+  <meta name="description" content="TidySnap terms of service">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --stone-50: #fafaf9;
+      --stone-100: #f5f5f4;
+      --stone-200: #e7e5e4;
+      --stone-400: #a8a29e;
+      --stone-600: #57534e;
+      --stone-800: #1c1917;
+      --emerald-600: #059669;
+    }
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--stone-50);
+      color: var(--stone-800);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.7;
+    }
+    .heading { font-family: 'Sora', sans-serif; }
+    .prose h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+      color: var(--stone-800);
+    }
+    .prose p { margin-bottom: 1rem; color: var(--stone-600); }
+    .prose ul { margin-bottom: 1rem; padding-left: 1.5rem; color: var(--stone-600); }
+    .prose li { margin-bottom: 0.5rem; }
+    .prose strong { color: var(--stone-800); }
+    .prose a { color: var(--emerald-600); text-decoration: underline; }
+    .prose ol { margin-bottom: 1rem; padding-left: 1.5rem; color: var(--stone-600); counter-reset: list-counter; }
+    .prose ol li { margin-bottom: 0.5rem; list-style: none; counter-increment: list-counter; }
+    .prose ol li::before { content: counter(list-counter) ". "; font-weight: 600; color: var(--stone-800); }
+  </style>
+</head>
+<body>
+
+  <header class="bg-white border-b border-stone-100 sticky top-0 z-50">
+    <div class="max-w-3xl mx-auto px-5 py-4 flex justify-between items-center">
+      <a href="/" class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-700 flex items-center justify-center text-white font-bold heading text-base">📸</div>
+        <span class="text-lg font-bold heading text-stone-800">TidySnap</span>
+      </a>
+      <a href="/" class="text-sm text-stone-500 hover:text-emerald-600 transition-colors">← Back</a>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-5 py-16">
+    <div class="mb-10">
+      <h1 class="heading text-3xl font-extrabold text-stone-800 mb-3">Terms of Service</h1>
+      <p class="text-stone-400 text-sm">Last updated: March 21, 2026</p>
+    </div>
+
+    <div class="prose bg-white rounded-2xl border border-stone-100 p-8 md:p-12 shadow-sm">
+
+      <h2>1. Acceptance of Terms</h2>
+      <p>By accessing or using TidySnap ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use the Service.</p>
+
+      <h2>2. Description of Service</h2>
+      <p>TidySnap provides an AI-powered desk organization service. Users upload photos of their desk, and our AI generates an annotated image with organization suggestions. The Service is provided "as is".</p>
+
+      <h2>3. Account Registration</h2>
+      <p>You may use TidySnap with or without an account. If you create an account, you agree to:</p>
+      <ul>
+        <li>Provide accurate and complete information</li>
+        <li>Keep your credentials secure</li>
+        <li>Notify us of any unauthorized access</li>
+      </ul>
+
+      <h2>4. Subscription and Payment</h2>
+      <p>TidySnap offers the following subscription tiers:</p>
+      <ul>
+        <li><strong>Free Plan</strong> — Limited to 1 desk analysis per account</li>
+        <li><strong>Lifetime Plan</strong> — One-time payment of $49 (early bird) or $99, granting unlimited access forever</li>
+      </ul>
+      <p>All payments are processed by <a href="https://stripe.com" target="_blank" rel="noopener">Stripe</a>. TidySnap does not store your payment card details. All payments are non-refundable unless required by applicable law.</p>
+      <p>Early bird pricing of $49 is available for a limited time at our discretion. We reserve the right to change pricing at any time, but changes will not affect existing Lifetime Plan subscribers.</p>
+
+      <h2>5. Acceptable Use</h2>
+      <p>You agree NOT to:</p>
+      <ul>
+        <li>Upload content that is illegal, harmful, or offensive</li>
+        <li>Attempt to reverse engineer, hack, or exploit the Service</li>
+        <li>Use automated tools to spam the Service</li>
+        <li>Resell or redistribute access to the Service</li>
+        <li>Upload photos containing personally identifiable information of others without consent</li>
+      </ul>
+
+      <h2>6. Intellectual Property</h2>
+      <p>TidySnap's name, logo, design, and original content are our property. The organization plans generated for you are for your personal use. You may not commercialize AI-generated outputs without explicit permission.</p>
+
+      <h2>7. AI-Generated Content</h2>
+      <p>Organization plans generated by TidySnap's AI are suggestions only. They do not constitute professional organization advice. Use your own judgment when following any recommendations.</p>
+
+      <h2>8. Limitation of Liability</h2>
+      <p>To the maximum extent permitted by law, TidySnap is provided "as is" without warranties of any kind. We are not liable for any indirect, incidental, special, or consequential damages arising from your use of the Service.</p>
+      <p>In particular, we are not responsible for:</p>
+      <ul>
+        <li>Loss of data (your desk photos are not stored)</li>
+        <li>Downtime or service interruptions</li>
+        <li>AI analysis quality or accuracy</li>
+        <li>Third-party service failures (Stripe, Google, Vercel)</li>
+      </ul>
+
+      <h2>9. Service Availability</h2>
+      <p>We strive to keep TidySnap available, but we do not guarantee uninterrupted access. We may modify, suspend, or discontinue the Service at any time with reasonable notice where practicable.</p>
+
+      <h2>10. Termination</h2>
+      <p>We may terminate or suspend your access to the Service immediately, without prior notice, for conduct that we believe violates these Terms or is harmful to other users, us, or third parties.</p>
+
+      <h2>11. Privacy</h2>
+      <p>Your use of the Service is also governed by our <a href="/privacy">Privacy Policy</a>. By using the Service, you consent to our data practices as described therein. Desk photos you upload are <strong>not stored</strong> on our servers after analysis.</p>
+
+      <h2>12. Changes to Terms</h2>
+      <p>We may update these Terms from time to time. Changes will be posted on this page with an updated date. Continued use of the Service after changes constitutes acceptance of the new Terms.</p>
+
+      <h2>13. Governing Law</h2>
+      <p>These Terms are governed by applicable law. If any provision of these Terms is found unenforceable, the remainder continues in effect.</p>
+
+      <h2>14. Contact</h2>
+      <p>For questions about these Terms, contact us at:</p>
+      <ul>
+        <li>Email: <a href="mailto:legal@tidysnap.homes">legal@tidysnap.homes</a></li>
+        <li>Domain: tidysnap.homes</li>
+      </ul>
+
+    </div>
+  </main>
+
+</body>
+</html>
