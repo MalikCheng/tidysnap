@@ -1262,6 +1262,7 @@ import '../styles/global.css';
     }
 
     function showError(msg) {
+      stopLoadingPhases();
       loadingEl.classList.add('hidden');
       resultEl.classList.add('hidden');
       uploadZone.classList.remove('hidden');
@@ -1270,6 +1271,7 @@ import '../styles/global.css';
     }
 
     window.resetUpload = function () {
+      stopLoadingPhases();
       uploadZone.classList.remove('hidden');
       loadingEl.classList.add('hidden');
       resultEl.classList.add('hidden');

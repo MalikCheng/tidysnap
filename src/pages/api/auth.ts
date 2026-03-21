@@ -7,7 +7,6 @@ import {
   createOrUpdateUser,
   findUserByEmail,
   createSession,
-  users,
   getUserFromSession,
   getCookieValue,
 } from './auth.shared';
@@ -50,10 +49,10 @@ export async function POST({ request, cookies }) {
         }
 
         // Find or create user
-        const user = createOrUpdateUser(email, 'google');
+        const user = await createOrUpdateUser(email, 'google');
 
         // Create session
-        const sessionId = createSession(user.id);
+        const sessionId = await createSession(user.email);
         cookies.set('session', sessionId, {
           path: '/',
           httpOnly: true,
@@ -88,15 +87,16 @@ export async function POST({ request, cookies }) {
     }
 
     if (action === 'register') {
-      if (users.has(email)) {
+      const existing = await findUserByEmail(email);
+      if (existing) {
         return new Response(JSON.stringify({ error: 'Email already registered' }), {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
         });
       }
 
-      const user = createOrUpdateUser(email, 'email');
-      const sessionId = createSession(user.id);
+      const user = await createOrUpdateUser(email, 'email');
+      const sessionId = await createSession(user.email);
       cookies.set('session', sessionId, {
         path: '/',
         httpOnly: true,
@@ -114,7 +114,7 @@ export async function POST({ request, cookies }) {
     }
 
     if (action === 'login') {
-      const user = findUserByEmail(email);
+      const user = await findUserByEmail(email);
       if (!user) {
         return new Response(JSON.stringify({ error: 'User not found' }), {
           status: 404,
@@ -122,7 +122,7 @@ export async function POST({ request, cookies }) {
         });
       }
 
-      const sessionId = createSession(user.id);
+      const sessionId = await createSession(user.email);
       cookies.set('session', sessionId, {
         path: '/',
         httpOnly: true,
@@ -165,7 +165,7 @@ export async function GET({ request }) {
     });
   }
 
-  const user = getUserFromSession(sessionId);
+  const user = await getUserFromSession(sessionId);
 
   if (!user) {
     return new Response(JSON.stringify({ loggedIn: false }), {

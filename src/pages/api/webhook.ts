@@ -4,7 +4,7 @@
 export const prerender = false;
 
 import Stripe from 'stripe';
-import { users, upgradeToLifetime } from './auth.shared';
+import { upgradeToLifetime, createOrUpdateUser } from './auth.shared';
 
 const stripe = new Stripe(import.meta.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
   apiVersion: '2025-01-27.acacia',
@@ -38,30 +38,22 @@ export async function POST({ request }) {
     case 'checkout.session.completed': {
       const session = event.data.object;
       const email = session.customer_email?.toLowerCase().trim();
-      const metadata = session.metadata;
 
-      console.log('Payment successful for:', email);
+      console.log('[Webhook] Payment successful for:', email);
 
-      // Upgrade user to lifetime
+      // Ensure user exists (may not be in memory on cold start),
+      // then upgrade to lifetime subscription
       if (email) {
-        const updated = upgradeToLifetime(email);
-        if (updated) {
-          console.log(`User ${email} upgraded to lifetime`);
-        } else {
-          // User might not be in memory (serverless cold start)
-          // Check if we have user by scanning (not ideal but works for warm instances)
-          let found = false;
-          for (const [userEmail, user] of users.entries()) {
-            if (userEmail.toLowerCase() === email) {
-              user.subscription = 'lifetime';
-              found = true;
-              console.log(`User ${email} upgraded to lifetime (via scan)`);
-              break;
-            }
+        try {
+          await createOrUpdateUser(email, 'stripe_checkout');
+          const updated = await upgradeToLifetime(email);
+          if (updated) {
+            console.log(`[Webhook] User ${email} upgraded to lifetime`);
+          } else {
+            console.error(`[Webhook] Failed to upgrade user ${email}`);
           }
-          if (!found) {
-            console.warn(`User ${email} not found in memory — may need manual upgrade or warm instance`);
-          }
+        } catch (err) {
+          console.error('[Webhook] Error updating subscription:', err.message);
         }
       }
       break;
@@ -69,18 +61,18 @@ export async function POST({ request }) {
 
     case 'customer.subscription.deleted': {
       const subscription = event.data.object;
-      console.log('Subscription canceled:', subscription.id);
+      console.log('[Webhook] Subscription canceled:', subscription.id);
       break;
     }
 
     case 'invoice.payment_failed': {
       const invoice = event.data.object;
-      console.log('Payment failed for:', invoice.customer_email);
+      console.log('[Webhook] Payment failed for:', invoice.customer_email);
       break;
     }
 
     default:
-      console.log('Unhandled event type:', event.type);
+      console.log('[Webhook] Unhandled event type:', event.type);
   }
 
   return new Response(JSON.stringify({ received: true }), {

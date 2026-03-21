@@ -18,7 +18,7 @@ export async function GET({ request }) {
     });
   }
 
-  const user = getUserFromSession(sessionId);
+  const user = await getUserFromSession(sessionId);
 
   if (!user) {
     return new Response(JSON.stringify({ loggedIn: false }), {
