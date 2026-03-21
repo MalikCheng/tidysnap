@@ -421,6 +421,8 @@ import '../styles/global.css';
       overflow: hidden;
       background: var(--stone-100);
       position: relative;
+      /* Enable native pinch-to-zoom and pan gestures */
+      touch-action: pan-x pan-y pinch-zoom;
     }
     .image-frame img {
       width: 100%; height: 100%;
@@ -429,10 +431,33 @@ import '../styles/global.css';
     }
     .image-frame.zoomable {
       cursor: zoom-in;
+      overflow: auto; /* allow scroll/pan on desktop */
+    }
+    .image-frame.zoomed {
+      cursor: zoom-out;
+      overflow: auto;
     }
     .image-frame.zoomed img {
       transform: scale(2);
-      cursor: zoom-out;
+    }
+
+    /* ── Degraded mode card ─────────────────────── */
+    .degraded-card {
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border: 1.5px solid #f59e0b;
+      border-radius: 20px;
+      padding: 20px;
+    }
+    .degraded-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px;
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #b45309;
+      margin-bottom: 12px;
     }
 
     /* ── Upgrade Banner ─────────────────────────── */
@@ -694,10 +719,20 @@ import '../styles/global.css';
         ⚠️
       </div>
       <h3 class="heading text-lg font-bold text-stone-800 mb-2">Something went wrong</h3>
-      <p class="text-stone-500 mb-6 text-sm" id="error-message">Please try again</p>
-      <button onclick="resetUpload()" class="btn-emerald !bg-red-500 !shadow-red-500/25">
-        Try Again
-      </button>
+      <p class="text-stone-500 mb-4 text-sm" id="error-message">Please try again</p>
+      <div class="flex flex-col gap-2.5">
+        <button onclick="resetUpload()" class="btn-emerald !bg-red-500 !shadow-red-500/25">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Try Again
+        </button>
+        <a href="mailto:support@tidysnap.homes?subject=Analysis failed"
+          class="text-center text-stone-400 hover:text-stone-600 text-sm py-1.5 transition-colors">
+          Contact Support
+        </a>
+      </div>
     </div>
 
     <!-- ── RESULT ─────────────────────────────── -->
@@ -947,13 +982,6 @@ import '../styles/global.css';
     let modalStack    = [];   // only one modal open at a time
 
     const FREE_LIMIT = 1;
-
-    // ── Loading Phase Cycling ─────────────────────
-    const LOADING_PHASES = [
-      { step: 1, title: 'Analyzing your desk…', subtitle: 'Detecting items and planning the perfect tidy route', icon: '🧠' },
-      { step: 2, title: 'Planning tidy route…', subtitle: 'Calculating the best order to organize your items', icon: '🗺️' },
-      { step: 3, title: 'Drawing arrows…', subtitle: 'Generating your personalized tidy guide', icon: '✨' },
-    ];
 
     let loadingPhaseTimer = null;
     let currentPhase = 0;
@@ -1230,7 +1258,26 @@ import '../styles/global.css';
         const res  = await fetch('/api/analyze', { method: 'POST', body: formData });
         const data = await res.json();
 
-        if (!res.ok || data.error) throw new Error(data.error || 'Analysis failed');
+        // HTTP-level error
+        if (!res.ok) throw new Error(data.error || 'Analysis failed');
+
+        // Degraded mode (AI timed out) — show text plan with friendly notice
+        if (data.degradedMode && data.plan) {
+          const frame = document.getElementById('plan-frame');
+          frame.innerHTML = `
+            <div class="degraded-card w-full h-full flex items-center justify-center p-5">
+              <div class="text-left max-w-full">
+                <div class="degraded-badge">⚡ Partial Result</div>
+                <p class="text-amber-800 text-sm font-bold mb-3">Your Tidy Plan:</p>
+                <div class="text-amber-700 text-sm whitespace-pre-line leading-relaxed">${data.plan}</div>
+                <p class="text-amber-600 text-xs mt-3">AI processing timed out — try again with a smaller image</p>
+              </div>
+            </div>`;
+          stopLoadingPhases();
+          loadingEl.classList.add('hidden');
+          resultEl.classList.remove('hidden');
+          return;
+        }
 
         if (data.imageUrl) {
           document.getElementById('plan-image').src = data.imageUrl;
@@ -1247,6 +1294,9 @@ import '../styles/global.css';
                 <div class="text-emerald-700 text-sm whitespace-pre-line">${data.plan}</div>
               </div>
             </div>`;
+        } else {
+          // Unexpected empty response
+          throw new Error('No result returned. Please try again.');
         }
 
         analysisCount++;
