@@ -1,6 +1,6 @@
 // API Endpoint: POST /api/analyze
 // Analyzes uploaded desk image and generates tidy plan with arrows
-// Uses Nana Banana 2 (Gemini Flash) for AI-powered desk organization
+// Uses Gemini 3.1 Flash Image Preview for image-to-image generation
 
 export const prerender = false;
 
@@ -8,32 +8,79 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import sharp from 'sharp';
 
 // Initialize Gemini with the Nana Banana API key
-// Key in .env.local: Gemini_NANA_Banana_API_KEY
+// Key in .env.local: GEMINI_NANA_BANANA_API_KEY or Gemini_NANA_Banana_API_KEY
 const genAI = new GoogleGenerativeAI(
-  import.meta.env.Gemini_NANA_Banana_API_KEY || import.meta.env.GEMINI_NANA_BANANA_API_KEY || 'AIzaSyA0a1Ez0M-0wJyfhdkVDnRsP3XJPjxFCCg'
+  import.meta.env.GEMINI_NANA_BANANA_API_KEY
+  || import.meta.env.Gemini_NANA_Banana_API_KEY
+  || ''
 );
 
 // Configuration
 const MAX_IMAGE_SIZE = 1024; // Max dimension for preprocessing
-const TIMEOUT_MS = 55000; // 55 seconds (leaving buffer before 60s limit)
+const TIMEOUT_MS = 45000;     // 45 seconds — leaves 15s buffer before 60s Vercel limit
+
+// Rate limiting: in-memory sliding window per IP (serverless-safe for MVP)
+// For production with Vercel KV: each cold-start resets, so this is best-effort protection
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 10;         // requests per window
+const RATE_WINDOW_MS = 60_000; // 1 minute window
+
+function getClientIP(request: Request): string {
+  // Vercel provides real IP in these headers
+  return (
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    request.headers.get('cf-connecting-ip') || // Cloudflare
+    'unknown'
+  );
+}
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number; retryAfter?: number } {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return { allowed: true, remaining: RATE_LIMIT - 1 };
+  }
+
+  if (entry.count >= RATE_LIMIT) {
+    return { allowed: false, remaining: 0, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
+  }
+
+  entry.count++;
+  return { allowed: true, remaining: RATE_LIMIT - entry.count };
+}
+
+// Periodic cleanup of expired rate limit entries
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of rateLimitMap.entries()) {
+    if (now > entry.resetAt + RATE_WINDOW_MS) rateLimitMap.delete(ip);
+  }
+}, 60_000);
+
+// Response types
+interface TidyItem {
+  name: string;
+  currentPosition: string;
+  targetPosition: string;
+  action: 'relocate' | 'remove' | 'reorganize';
+}
 
 interface AnalyzeResult {
   success: boolean;
   plan?: string;
   imageUrl?: string;
-  items?: Array<{
-    name: string;
-    currentPosition: string;
-    targetPosition: string;
-    arrow?: { start: { x: number; y: number }; end: { x: number; y: number } };
-  }>;
-  error?: string;
+  items?: TidyItem[];
   degradedMode?: boolean;
+  error?: string;
 }
 
-/**
- * Preprocess image: resize and standardize format
- */
+// ---------------------------------------------------------------------------
+// Image preprocessing
+// ---------------------------------------------------------------------------
+
 async function preprocessImage(
   buffer: Buffer,
   mimeType: string
@@ -41,12 +88,9 @@ async function preprocessImage(
   const image = sharp(buffer);
   const metadata = await image.metadata();
 
-  // Get current dimensions
   const width = metadata.width || MAX_IMAGE_SIZE;
   const height = metadata.height || MAX_IMAGE_SIZE;
 
-  // Calculate resize needed
-  let resizeNeeded = false;
   let targetWidth = width;
   let targetHeight = height;
 
@@ -58,74 +102,112 @@ async function preprocessImage(
       targetHeight = MAX_IMAGE_SIZE;
       targetWidth = Math.round((width / height) * MAX_IMAGE_SIZE);
     }
-    resizeNeeded = true;
   }
 
-  // Resize if needed
-  let processedImage = image;
-  if (resizeNeeded) {
-    processedImage = image.resize(targetWidth, targetHeight, {
-      fit: 'inside',
-      withoutEnlargement: true,
-    });
-  }
+  const processedImage = image.resize(targetWidth, targetHeight, {
+    fit: 'inside',
+    withoutEnlargement: true,
+  });
 
-  // Convert to WebP for smaller size and consistency
   const outputBuffer = await processedImage.webp({ quality: 85 }).toBuffer();
-
-  return {
-    buffer: outputBuffer,
-    mimeType: 'image/webp',
-  };
+  return { buffer: outputBuffer, mimeType: 'image/webp' };
 }
 
-/**
- * Analyze desk image and generate tidy plan with Nana Banana 2
- */
+// ---------------------------------------------------------------------------
+// Nana Banana 2 — AI Analysis & Image Generation
+// ---------------------------------------------------------------------------
+
 async function analyzeWithNanaBanana(
   base64Image: string,
-  mimeType: string
+  mimeType: string,
+  timeoutMs: number
 ): Promise<{ text: string; imageData?: string }> {
   const model = genAI.getGenerativeModel({
     model: 'gemini-3.1-flash-image-preview',
   });
 
-  // Enhanced prompt for generating annotated tidy plan
-  const prompt = `You are "Nana Banana 2", an expert desk organization AI.
+  // Phase 1: Analyze the desk and plan (fast, text-only)
+  const analysisPrompt = `You are "Nana Banana 2", a friendly desk organization expert.
 
-TASK: Analyze this messy desk image and create a comprehensive tidy plan.
+TASK: Analyze this messy desk image and create a tidy plan.
 
-INPUT IMAGE ANALYSIS:
-1. Identify ALL items on the desk (books, cups, papers, laptop, phone, cables, etc.)
-2. Note their current positions
-3. Determine optimal final positions for each item
+ANALYZE:
+1. List every item on the desk (books, cups, papers, laptop, phone, cables, notebooks, etc.)
+2. Note where each item currently sits
+3. Determine where each item should go for a clean, organized desk
 
-OUTPUT REQUIREMENTS:
-You MUST respond with BOTH:
-1. A detailed TEXT PLAN listing each item, its current spot, and where it should go
-2. An ANNOTATED IMAGE showing the tidy version with:
-   - Clear ARROWS pointing from current positions to target positions
-   - LABELS for each item (what it is)
-   - Clean desk surface showing organized state
-   - Color-coded arrows (e.g., red for items to remove, green for items to relocate)
+RESPOND with this EXACT JSON format (no extra text, valid JSON only):
+{
+  "items": [
+    {
+      "name": "item name",
+      "currentPosition": "where it is now",
+      "targetPosition": "where it should go",
+      "action": "relocate"
+    }
+  ],
+  "summary": "2-3 sentence summary of the overall tidy strategy"
+}
 
-IMPORTANT:
-- Generate a visual image that SHOWS the arrows overlaid on the desk
-- Use the prompt format: "Organized desk with arrows showing where each item goes: [list items]"
-- Make the annotated image clearly show movement directions
+Action values: "relocate" (move to new spot), "remove" (put away/throw away), "reorganize" (rearrange on desk)`;
 
-Respond with your text analysis AND generate an image showing the tidy desk plan.`;
+  // Phase 2: Generate annotated image (with arrows and labels)
+  // Detailed visual spec for high-contrast, readable overlays on ANY desk background
+  const imagePrompt = `You are "Nana Banana 2", a desk organization expert.
 
+Look at this messy desk photo and create an annotated image showing EXACTLY how to tidy it.
+
+VISUAL OVERLAY SPECIFICATION (MUST FOLLOW EXACTLY):
+
+ARROW COLORS:
+- 🟢 GREEN #10B981 = items to relocate/reorganize (keep on desk but move)
+- 🔴 RED #EF4444 = items to remove/put away (discard or store elsewhere)
+- Add a small legend in the top-left corner: "🟢 Move | 🔴 Remove"
+
+ARROW STYLE (CRITICAL for visibility):
+- Stroke width: 10px (relative to image scale)
+- ALL arrows MUST have a 3-4px WHITE outer stroke (#FFFFFF) — this is non-negotiable for visibility on any background
+- Add a subtle dark drop shadow: 2px offset-y, 3px blur, #1E293B at 50% opacity
+- Arrow heads: filled triangles, 3x the stroke width
+- Curved paths preferred over straight lines
+- lineCap and lineJoin: round
+- Maximum 10 arrows total (prevent visual clutter)
+
+LABEL PILLS:
+- Background: #FFFFFF (pure white)
+- Border-radius: 8px
+- Text color: #0F172A (near black)
+- Font: bold sans-serif, 14px equivalent
+- Shadow: 0 2px 8px rgba(0,0,0,0.15)
+- Position: at the START of each arrow (near the item)
+- Short text only: "Trash", "Drawer", "Shelf", "Keep", "Donate", etc.
+- Keep labels ABOVE or BELOW arrows, never inline
+
+DESTINATION MARKERS:
+- Place bright ORANGE #F97316 circles at arrow endpoints (where items should go)
+- 20px diameter with 2px white border
+- Add subtle shadow: 0 2px 6px rgba(0,0,0,0.2)
+
+LAYOUT RULES:
+- Keep the original desk photo clearly visible underneath
+- Do NOT cover items with arrows
+- Maintain photo realism — overlays should look native to the image
+- Arrows must NOT overlap each other
+
+Return the annotated image showing the tidy plan with clearly visible colored arrows, white-outlined for contrast on any desk surface.`;
+
+  // Use generateContent with both text instructions
+  // Note: gemini-3.1-flash-image-preview supports image generation via generateContent
+  // with inline image parts in the response
   const result = await model.generateContent([
     { inlineData: { mimeType, data: base64Image } },
-    prompt,
+    analysisPrompt,
   ]);
 
   const response = result.response;
   let textResponse = '';
   let imageData: string | undefined;
 
-  // Extract text and image from response
   if (response.candidates?.[0]?.content?.parts) {
     for (const part of response.candidates[0].content.parts) {
       if (part.text) {
@@ -137,50 +219,119 @@ Respond with your text analysis AND generate an image showing the tidy desk plan
     }
   }
 
+  // If no image came back, try a second call specifically for image generation
+  if (!imageData) {
+    try {
+      const imageModel = genAI.getGenerativeModel({
+        model: 'gemini-3.1-flash-image-preview',
+      });
+
+      // Second call: generate annotated image using the original as reference
+      const imageResult = await imageModel.generateContent([
+        { inlineData: { mimeType, data: base64Image } },
+        imagePrompt,
+      ]);
+
+      if (imageResult.response.candidates?.[0]?.content?.parts) {
+        for (const part of imageResult.response.candidates[0].content.parts) {
+          if (part.inlineData) {
+            imageData = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+            break;
+          }
+        }
+      }
+    } catch (imgError) {
+      console.warn('[Analyze] Image generation call failed:', imgError);
+      // Continue without image — text-only fallback is acceptable
+    }
+  }
+
   return { text: textResponse.trim(), imageData };
 }
 
-/**
- * Generate SVG overlay with arrows and labels (fallback method)
- */
-function generateAnnotatedImageSvg(
-  items: Array<{
-    name: string;
-    currentX: number;
-    currentY: number;
-    targetX: number;
-    targetY: number;
-    color: string;
-  }>,
-  width: number,
-  height: number
-): string {
-  const arrows = items
-    .map(
-      (item, i) => `
-    <defs>
-      <marker id="arrowhead-${i}" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-        <polygon points="0 0, 10 3.5, 0 7" fill="${item.color}"/>
-      </marker>
-    </defs>
-    <line x1="${item.currentX}" y1="${item.currentY}" x2="${item.targetX}" y2="${item.targetY}"
-          stroke="${item.color}" stroke-width="4" marker-end="url(#arrowhead-${i})"/>
-    <rect x="${item.targetX - 40}" y="${item.targetY - 40}" width="80" height="30" rx="5" fill="${item.color}" opacity="0.9"/>
-    <text x="${item.targetX}" y="${item.targetY - 18}" text-anchor="middle" fill="white" font-size="12" font-weight="bold">${item.name}</text>
-  `
-    )
-    .join('');
+// ---------------------------------------------------------------------------
+// Parse structured items from AI response
+// ---------------------------------------------------------------------------
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-    ${arrows}
-  </svg>`;
+function parseItems(textResponse: string): TidyItem[] {
+  const items: TidyItem[] = [];
+
+  // Try JSON parsing first (preferred)
+  const jsonMatch = textResponse.match(/\{[\s\S]*"items"[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (Array.isArray(parsed.items)) {
+        for (const item of parsed.items) {
+          if (item.name && item.currentPosition && item.targetPosition) {
+            items.push({
+              name: item.name,
+              currentPosition: item.currentPosition,
+              targetPosition: item.targetPosition,
+              action: item.action || 'relocate',
+            });
+          }
+        }
+      }
+    } catch {
+      // JSON parse failed, fall back to regex
+    }
+  }
+
+  // Fallback: regex parsing for non-JSON text responses
+  if (items.length === 0) {
+    const lines = textResponse.split('\n');
+    for (const line of lines) {
+      const match = line.match(/^[-•*]?\s*([^:]+):\s*(.+)[\s\-–→]+\s*(.+)/);
+      if (match) {
+        const name = match[1].trim();
+        const current = match[2].trim();
+        const target = match[3].trim();
+        const action: TidyItem['action'] = current.includes('remove') || current.includes('throw')
+          ? 'remove'
+          : 'reorganize';
+
+        items.push({
+          name,
+          currentPosition: current,
+          targetPosition: target,
+          action,
+        });
+      }
+    }
+  }
+
+  return items;
 }
+
+// ---------------------------------------------------------------------------
+// Main handler
+// ---------------------------------------------------------------------------
 
 export async function POST({ request }: { request: Request }): Promise<Response> {
   const startTime = Date.now();
+  const clientIP = getClientIP(request);
+
+  // Rate limiting check
+  const rateCheck = checkRateLimit(clientIP);
+  if (!rateCheck.allowed) {
+    return new Response(
+      JSON.stringify({
+        error: 'Too many requests. Please wait a moment before trying again.',
+        retryAfter: rateCheck.retryAfter,
+      } as AnalyzeResult),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': String(rateCheck.retryAfter || 60),
+          'X-RateLimit-Remaining': '0',
+        },
+      }
+    );
+  }
 
   try {
-    // Parse form data
     const formData = await request.formData();
     const imageFile = formData.get('image') as File;
 
@@ -191,109 +342,111 @@ export async function POST({ request }: { request: Request }): Promise<Response>
       });
     }
 
-    console.log(`[Analyze] Received image: ${imageFile.name}, size: ${imageFile.size}`);
+    const mimeType = imageFile.type || 'image/jpeg';
+    if (!mimeType.startsWith('image/')) {
+      return new Response(JSON.stringify({ error: 'Please upload an image file (JPG, PNG, or WEBP)' } as AnalyzeResult), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
-    // Read image bytes
+    if (imageFile.size > 10 * 1024 * 1024) {
+      return new Response(JSON.stringify({ error: 'File must be under 10MB' } as AnalyzeResult), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log(`[Analyze] Received: ${imageFile.name}, ${(imageFile.size / 1024).toFixed(1)}KB`);
+
+    // Read and preprocess image
     const bytes = await imageFile.arrayBuffer();
     let imageBuffer = Buffer.from(bytes);
-    let mimeType = imageFile.type || 'image/jpeg';
 
-    // Preprocess image (resize, standardize format)
     try {
       const processed = await preprocessImage(imageBuffer, mimeType);
       imageBuffer = processed.buffer;
-      mimeType = processed.mimeType;
-      console.log(`[Analyze] Preprocessed image: ${processed.buffer.length} bytes, ${mimeType}`);
+      console.log(`[Analyze] Preprocessed: ${(processed.buffer.length / 1024).toFixed(1)}KB, ${processed.mimeType}`);
     } catch (preprocessError) {
       console.warn('[Analyze] Preprocessing failed, using original:', preprocessError);
-      // Continue with original image
     }
 
-    // Convert to base64
     const base64 = imageBuffer.toString('base64');
-
-    // Check timeout
     const remainingTime = TIMEOUT_MS - (Date.now() - startTime);
+
+    // Check timeout before even starting AI call
     if (remainingTime <= 0) {
       return new Response(
         JSON.stringify({
           success: true,
           degradedMode: true,
-          plan: 'Analysis timed out. Please try with a smaller image.',
-          error: 'Timeout - try a smaller image',
+          plan: 'Processing timed out. Please try with a smaller image or wait a moment.',
+          error: 'Timeout — try a smaller image',
         } as AnalyzeResult),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    // Call Nana Banana 2 with timeout
-    let textResult: string;
+    // Tier 1: Full AI analysis + image generation with timeout
+    let textResult = '';
     let imageUrl: string | undefined;
+    let degradedMode = false;
 
     try {
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('AI timeout')), remainingTime);
+        setTimeout(() => reject(new Error('AI timeout')), Math.min(remainingTime, TIMEOUT_MS));
       });
 
-      const aiPromise = analyzeWithNanaBanana(base64, mimeType);
-
+      const aiPromise = analyzeWithNanaBanana(base64, mimeType, remainingTime);
       const aiResult = await Promise.race([aiPromise, timeoutPromise]);
 
       textResult = aiResult.text;
       imageUrl = aiResult.imageData;
 
-      console.log(`[Analyze] Nana Banana response: ${textResult.substring(0, 100)}...`);
+      console.log(`[Analyze] AI response: ${textResult.substring(0, 100)}... (image: ${!!imageUrl})`);
+
     } catch (aiError: any) {
-      console.error('[Analyze] AI Error:', aiError.message);
+      console.error('[Analyze] AI error:', aiError.message);
+      degradedMode = true;
 
-      // Degraded mode: return preprocessing info
-      return new Response(
-        JSON.stringify({
-          success: true,
-          degradedMode: true,
-          plan: `Image preprocessed successfully (${(imageBuffer.length / 1024).toFixed(1)}KB). ` +
-            `AI analysis timed out. Please try again with a smaller image or wait a moment.`,
-          error: aiError.message,
-        } as AnalyzeResult),
-        {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    // Parse items from text response
-    const items: AnalyzeResult['items'] = [];
-    const lines = textResult.split('\n');
-    for (const line of lines) {
-      // Look for patterns like "Laptop: desk → drawer" or "Book: left → right shelf"
-      const match = line.match(/^[-•*]?\s*([^:]+):\s*(.+)→(.+)/);
-      if (match) {
-        items.push({
-          name: match[1].trim(),
-          currentPosition: match[2].trim(),
-          targetPosition: match[3].trim(),
-        });
+      // Tier 2: If we got a partial text response, use it
+      if (textResult) {
+        // Partial success — we have text, no image
+        degradedMode = true;
+      } else {
+        // Tier 3: Complete failure — no text, no image
+        const sizeKb = (imageBuffer.length / 1024).toFixed(1);
+        return new Response(
+          JSON.stringify({
+            success: true,
+            degradedMode: true,
+            plan: `Image preprocessed successfully (${sizeKb}KB). ` +
+              `AI analysis timed out. Please try again with a smaller image or wait a moment.`,
+            error: aiError.message,
+          } as AnalyzeResult),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
       }
     }
 
-    // Build response
+    // Parse structured items
+    const items = parseItems(textResult);
+
     const response: AnalyzeResult = {
       success: true,
       plan: textResult,
       imageUrl,
       items: items.length > 0 ? items : undefined,
+      degradedMode,
     };
 
-    console.log(`[Analyze] Complete in ${Date.now() - startTime}ms`);
+    console.log(`[Analyze] Complete in ${Date.now() - startTime}ms (degraded: ${degradedMode})`);
 
     return new Response(JSON.stringify(response), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
+
   } catch (error: any) {
     console.error('[Analyze] Error:', error);
 
@@ -302,10 +455,7 @@ export async function POST({ request }: { request: Request }): Promise<Response>
         success: false,
         error: error.message || 'Analysis failed',
       } as AnalyzeResult),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }

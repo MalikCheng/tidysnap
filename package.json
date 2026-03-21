@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node public/css/build-utilities.js && astro build",
     "preview": "astro preview",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
@@ -18,10 +18,12 @@
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.17",
+    "@astrojs/sitemap": "^3.7.1",
     "@astrojs/vercel": "^9.0.5",
     "@google/generative-ai": "^0.24.1",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.1",
+    "@vercel/kv": "^2.0.0",
     "astro": "^5.0.0",
     "cookie": "^1.1.1",
     "stripe": "^20.4.1",
