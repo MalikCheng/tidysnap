@@ -542,26 +542,86 @@ import '../styles/global.css';
       inset: 0;
       pointer-events: none;
     }
+    /* ── Numbered Badge (on image) ─────────────── */
     .label-item {
       position: absolute;
-      background: white;
-      border: 2px solid #3B82F6;
-      border-radius: 8px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #1F2937;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      white-space: nowrap;
+      width: 24px;
+      height: 24px;
+      background: #3B82F6;
+      border: 2px solid white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'Sora', 'Outfit', sans-serif;
+      color: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
       transform: translate(-50%, -50%);
       z-index: 10;
-      font-family: 'Sora', 'Outfit', sans-serif;
+      line-height: 1;
     }
-    .label-item span {
-      display: block;
-      font-size: 10px;
-      color: #6B7280;
-      font-weight: 400;
+
+    /* ── Legend Panel ──────────────────────────── */
+    .legend-panel {
+      background: white;
+      border: 1px solid var(--stone-100);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .legend-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--stone-400);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .legend-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .legend-num {
+      width: 22px;
+      height: 22px;
+      background: #3B82F6;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+      font-family: 'Sora', sans-serif;
+    }
+    .legend-name {
+      font-weight: 600;
+      color: var(--stone-800);
+      flex-shrink: 0;
+    }
+    .legend-arrow {
+      color: var(--stone-300);
+      flex-shrink: 0;
+    }
+    .legend-target {
+      color: var(--stone-500);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .canvas-container img {
       width: 100%;
@@ -926,8 +986,23 @@ import '../styles/global.css';
               </svg>
             </button>
           </div>
+          <!-- Legend panel -->
+          <div id="legend-panel" class="px-4 pb-4 hidden">
+            <div class="bg-stone-50 rounded-xl p-3">
+              <p class="text-xs font-semibold text-stone-500 mb-2 uppercase tracking-wide">Item Labels</p>
+              <div id="legend-items" class="space-y-1">
+                <!-- Legend items will be injected by JS -->
+              </div>
+            </div>
+          </div>
         </div>
 
+      </div>
+
+      <!-- Legend Panel (numbered items list) -->
+      <div id="legend-panel" class="legend-panel hidden mt-5">
+        <div class="legend-title">Tidy Guide</div>
+        <div id="legend-list" class="legend-list"></div>
       </div>
 
       <!-- Secondary actions -->
@@ -1491,6 +1566,7 @@ import '../styles/global.css';
       fileInput.value = '';
       isZoomed = false;
       planFrame?.classList.remove('zoomed');
+      document.getElementById('legend-panel')?.classList.add('hidden');
     };
 
     // ── Zoom ───────────────────────────────────
@@ -1511,7 +1587,7 @@ import '../styles/global.css';
       ctx: CanvasRenderingContext2D,
       fromX: number, fromY: number,
       toX: number, toY: number,
-      label: string,
+      badgeNum: number,
       scale: number
     ) {
       const stroke = 3;
@@ -1523,7 +1599,7 @@ import '../styles/global.css';
       const angle = Math.atan2(dy, dx);
       const length = Math.sqrt(dx * dx + dy * dy);
 
-      // Control point for bezier curve (perpendicular offset for a gentle curve)
+      // Control point for bezier curve
       const midX = (fromX + toX) / 2;
       const midY = (fromY + toY) / 2;
       const perpAngle = angle + Math.PI / 2;
@@ -1563,35 +1639,30 @@ import '../styles/global.css';
       ctx.fillStyle = ARROW_COLOR_V2;
       ctx.fill();
 
-      // Label pill
-      if (label) {
-        const shortLabel = label.length > 12 ? label.substring(0, 11) + '…' : label;
-        const fontSize = Math.max(11, 13 * scale);
-        ctx.font = `600 ${fontSize}px 'Sora', 'Outfit', sans-serif`;
-        const textMetrics = ctx.measureText(shortLabel);
-        const labelPadX = 8 * scale;
-        const labelPadY = 4 * scale;
-        const labelW = textMetrics.width + labelPadX * 2;
-        const labelH = fontSize + labelPadY * 2;
-        // Position label at start of arrow, offset above
-        const labelX = fromX - labelW / 2;
-        const labelY = fromY - labelH - 10 * scale;
+      // Numbered badge at start of arrow
+      const badgeRadius = Math.max(10, 14 * scale);
+      const badgeX = fromX;
+      const badgeY = fromY - badgeRadius * 2;
 
-        // Label background (white with blue border)
-        ctx.fillStyle = '#FFFFFF';
-        ctx.strokeStyle = '#3B82F6';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        roundRect2(ctx, labelX, labelY, labelW, labelH, 8 * scale);
-        ctx.fill();
-        ctx.stroke();
+      // White outer ring
+      ctx.beginPath();
+      ctx.arc(badgeX, badgeY, badgeRadius + 2, 0, Math.PI * 2);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fill();
 
-        // Label text
-        ctx.fillStyle = '#1F2937';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(shortLabel, fromX, labelY + labelH / 2);
-      }
+      // Blue circle
+      ctx.beginPath();
+      ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI * 2);
+      ctx.fillStyle = ARROW_COLOR_V2;
+      ctx.fill();
+
+      // Number text
+      const fontSize = Math.max(10, 12 * scale);
+      ctx.font = `700 ${fontSize}px 'Sora', 'Outfit', sans-serif`;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(badgeNum), badgeX, badgeY);
 
       ctx.restore();
     }
@@ -1644,9 +1715,7 @@ import '../styles/global.css';
             const fromY = item.from.y * scaleY;
             const toX = item.to.x * scaleX;
             const toY = item.to.y * scaleY;
-            const emoji = item.emoji ? item.emoji + ' ' : '';
-            const label = emoji + (item.name || item.targetPosition || '');
-            drawArrowV2(ctx, fromX, fromY, toX, toY, label, 1);
+            drawArrowV2(ctx, fromX, fromY, toX, toY, i + 1, 1);
           }
         }
       };
@@ -1675,24 +1744,17 @@ import '../styles/global.css';
           const pos = item.from || item.position;
           if (!pos) continue;
 
-          const label = document.createElement('div');
-          label.className = 'label-item';
-
-          const emoji = item.emoji || '';
-          const name = item.name || '';
-          const subtitle = item.targetPosition ? '→ ' + item.targetPosition.split(' ').slice(0, 2).join(' ') : '';
-
-          label.style.left = `${pos.x}%`;
-          label.style.top = `${pos.y}%`;
-          label.innerHTML = `${emoji} ${name}${subtitle ? `<span>${subtitle}</span>` : ''}`;
-
-          // Vertical offset for overlapping labels
-          if (i > 0) {
-            label.style.marginTop = `${(i % 3) * 28}px`;
-          }
-
-          container.appendChild(label);
+          // Numbered badge on image
+          const badge = document.createElement('div');
+          badge.className = 'label-item';
+          badge.textContent = String(i + 1);
+          badge.style.left = `${pos.x}%`;
+          badge.style.top = `${pos.y}%`;
+          container.appendChild(badge);
         }
+
+        // Render legend panel
+        renderLegend(items, count);
       };
 
       if (img.complete && img.naturalWidth > 0) {
@@ -1700,6 +1762,32 @@ import '../styles/global.css';
       } else {
         img.onload = render;
       }
+    }
+
+    function renderLegend(items: any[], count: number) {
+      const legend = document.getElementById('legend-panel');
+      const legendList = document.getElementById('legend-list');
+      if (!legend || !legendList) return;
+
+      legendList.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const item = items[i];
+        const emoji = item.emoji || '';
+        const name = item.name || 'Item';
+        const target = item.targetPosition || item.target || '';
+
+        const row = document.createElement('div');
+        row.className = 'legend-item';
+        row.innerHTML = `
+          <div class="legend-num">${i + 1}</div>
+          <span class="legend-name">${emoji} ${name}</span>
+          <span class="legend-arrow">→</span>
+          <span class="legend-target">${target}</span>
+        `;
+        legendList.appendChild(row);
+      }
+
+      legend.classList.remove('hidden');
     }
     async function compositeArrowImage(cleanImgSrc: string): Promise<string> {
       return new Promise((resolve, reject) => {
