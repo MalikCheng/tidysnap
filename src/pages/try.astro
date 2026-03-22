@@ -523,16 +523,114 @@ import '../styles/global.css';
       margin: 0 auto 16px;
     }
 
-    /* ── Result Grid ───────────────────────────── */
+    /* ── Canvas Arrow Overlay ──────────────────── */
+    .canvas-container {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--stone-100);
+    }
+    .canvas-container canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .canvas-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ── Result Grid (2 columns: Before + After) ── */
     .result-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 24px;
+      gap: 16px;
     }
-    @media (min-width: 768px) {
+    @media (min-width: 640px) {
       .result-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
       }
+    }
+
+    /* ── Mobile Horizontal Scroll ─────────────── */
+    .result-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 12px;
+      margin: 0 -20px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    .result-scroll > .card {
+      flex: 0 0 85vw;
+      max-width: 320px;
+      scroll-snap-align: center;
+    }
+    @media (min-width: 640px) {
+      .result-scroll {
+        display: contents;
+        overflow: visible;
+        padding: 0;
+        margin: 0;
+      }
+      .result-scroll > .card {
+        flex: none;
+        max-width: none;
+      }
+    }
+
+    /* ── SVG Overlay ───────────────────────────── */
+    .svg-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .svg-overlay svg {
+      width: 100%;
+      height: 100%;
+    }
+    .arrow-path {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .arrow-outline {
+      stroke: #FFFFFF;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .arrow-green { stroke: #10B981; }
+    .arrow-red { stroke: #EF4444; }
+    .label-bg {
+      fill: #FFFFFF;
+      rx: 6;
+    }
+    .label-text {
+      font-family: 'Sora', 'Outfit', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      fill: #0F172A;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .label-shadow {
+      fill: rgba(0,0,0,0.15);
+    }
+
+    @media (max-width: 640px) {
+      .arrow-outline { stroke-width: 7px; }
+      .arrow-path { stroke-width: 4px; }
+      .label-text { font-size: 11px; }
     }
 
     /* ── Input fields ──────────────────────────── */
@@ -686,17 +784,17 @@ import '../styles/global.css';
       <div class="loading-steps" id="loading-steps">
         <div class="loading-step active" id="step-1">
           <span class="step-dot"></span>
-          <span>📸 Detecting items</span>
+          <span>📸 Scanning workspace</span>
         </div>
         <span class="loading-step-sep">›</span>
         <div class="loading-step pending" id="step-2">
           <span class="step-dot"></span>
-          <span>🗺️ Planning route</span>
+          <span>🎨 Generating tidy vision</span>
         </div>
         <span class="loading-step-sep">›</span>
         <div class="loading-step pending" id="step-3">
           <span class="step-dot"></span>
-          <span>✨ Drawing arrows</span>
+          <span>🏷️ Adding labels</span>
         </div>
       </div>
 
@@ -740,7 +838,7 @@ import '../styles/global.css';
 
       <div class="result-grid anim-stagger">
 
-        <!-- Original -->
+        <!-- Before: Original messy desk -->
         <div class="card">
           <div class="card-header">
             <div class="card-badge !bg-blue-50">📸</div>
@@ -756,13 +854,13 @@ import '../styles/global.css';
           </div>
         </div>
 
-        <!-- Tidy Plan -->
+        <!-- After: Clean desk effect image with labels -->
         <div class="card">
           <div class="card-header">
             <div class="card-badge !bg-emerald-50">✨</div>
             <div class="flex-1">
               <h3 class="heading text-base font-bold text-stone-800">After</h3>
-              <p class="text-stone-400 text-xs">AI tidy plan with arrows</p>
+              <p class="text-stone-400 text-xs">Your tidy vision with labels</p>
             </div>
             <button id="zoom-btn" class="p-2 rounded-xl hover:bg-stone-100 transition-colors" title="Zoom">
               <svg class="w-5 h-5 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -772,14 +870,15 @@ import '../styles/global.css';
             </button>
           </div>
           <div class="p-4">
-            <div id="plan-frame" class="image-frame aspect-[4/3] zoomable">
-              <img id="plan-image" alt="AI tidy plan">
+            <div id="plan-frame" class="image-frame aspect-[4/3] zoomable canvas-container">
+              <img id="plan-image" alt="AI tidy plan with labels">
+              <canvas id="arrow-canvas"></canvas>
               <div class="plan-badge">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                     d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                 </svg>
-                Tidy Plan
+                Labeled
               </div>
             </div>
           </div>
@@ -987,16 +1086,16 @@ import '../styles/global.css';
     let currentPhase = 0;
 
     function setLoadingStep(step) {
-      const icons = ['📸', '🗺️', '✨'];
+      const icons = ['📸', '🎨', '🏷️'];
       const titles = [
-        'Analyzing your desk…',
-        'Planning tidy route…',
-        'Drawing arrows…',
+        'Scanning your desk…',
+        'Creating your tidy vision…',
+        'Adding item labels…',
       ];
       const subtitles = [
-        'Detecting items and planning the perfect tidy route',
-        'Calculating the best order to organize your items',
-        'Generating your personalized tidy guide',
+        'Analyzing your workspace layout',
+        'Generating the perfect tidy plan',
+        'Labeling each item for you',
       ];
 
       for (let i = 1; i <= 3; i++) {
@@ -1278,10 +1377,18 @@ import '../styles/global.css';
           return;
         }
 
-        if (data.imageUrl) {
-          document.getElementById('plan-image').src = data.imageUrl;
-          document.getElementById('download-btn').href = data.imageUrl;
+        // Handle API response: prefer labelsImageUrl or cleanImageUrl, fallback to imageUrl
+        const afterImageUrl = data.labelsImageUrl || data.cleanImageUrl || data.imageUrl;
+
+        if (afterImageUrl) {
+          document.getElementById('plan-image').src = afterImageUrl;
+          document.getElementById('download-btn').href = afterImageUrl;
           document.getElementById('plan-frame').classList.remove('hidden');
+
+          // Render arrows on canvas if items[] provided
+          if (data.items && data.items.length > 0) {
+            renderArrowsOnCanvas('arrow-canvas', 'plan-image', data.items);
+          }
         } else if (data.plan) {
           // Text-only plan fallback
           document.getElementById('plan-frame').innerHTML = `
@@ -1341,47 +1448,236 @@ import '../styles/global.css';
       planFrame?.classList.toggle('zoomed', isZoomed);
     });
 
-    // ── Share ──────────────────────────────────
-    document.getElementById('share-btn')?.addEventListener('click', async () => {
-      const planImg = document.getElementById('plan-image');
-      if (!planImg?.src || planImg.src.includes('data:')) {
-        alert('No image to share yet');
-        return;
+    // ── Canvas Arrow Renderer ────────────────────
+    // Color system from VISUAL-SPEC.md
+    const ARROW_COLOR = {
+      relocate:   '#10B981', // green
+      remove:    '#EF4444', // red
+      reorganize: '#10B981', // green
+    };
+    const ARROW_ORANGE = '#F97316'; // destination marker
+    const STROKE_COLOR = '#FFFFFF'; // white outer stroke
+    const SHADOW_COLOR = 'rgba(30,41,59,0.5)';
+
+    function drawArrow(
+      ctx: CanvasRenderingContext2D,
+      fromX: number, fromY: number,
+      toX: number, toY: number,
+      color: string,
+      label: string,
+      scale: number
+    ) {
+      const stroke = Math.max(4, 8 * scale);
+      const headLen = Math.max(20, 25 * scale);
+      const headWidth = Math.max(12, 18 * scale);
+
+      // Compute direction
+      const dx = toX - fromX;
+      const dy = toY - fromY;
+      const angle = Math.atan2(dy, dx);
+      const length = Math.sqrt(dx * dx + dy * dy);
+
+      // Arrow body end (leave room for head)
+      const endX = fromX + Math.cos(angle) * Math.max(20 * scale, length - headLen * 0.5);
+      const endY = fromY + Math.sin(angle) * Math.max(20 * scale, length - headLen * 0.5);
+
+      ctx.save();
+
+      // 1. Drop shadow
+      ctx.shadowColor = SHADOW_COLOR;
+      ctx.shadowBlur = 6 * scale;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 3 * scale;
+
+      // 2. White outer stroke
+      ctx.strokeStyle = STROKE_COLOR;
+      ctx.lineWidth = stroke + 4 * scale;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+
+      // 3. Colored arrow fill
+      ctx.shadowColor = 'transparent';
+      ctx.strokeStyle = color;
+      ctx.lineWidth = stroke;
+      ctx.beginPath();
+      ctx.moveTo(fromX, fromY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+
+      // 4. Arrow head (filled triangle)
+      const headBaseX = endX;
+      const headBaseY = endY;
+      const tipX = fromX + Math.cos(angle) * Math.max(30 * scale, length - 5 * scale);
+      const tipY = fromY + Math.sin(angle) * Math.max(30 * scale, length - 5 * scale);
+
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(
+        headBaseX - Math.cos(angle - 0.5) * headLen,
+        headBaseY - Math.sin(angle - 0.5) * headLen
+      );
+      ctx.lineTo(
+        headBaseX - Math.cos(angle + 0.5) * headLen,
+        headBaseY - Math.sin(angle + 0.5) * headLen
+      );
+      ctx.closePath();
+
+      // Shadow on head
+      ctx.shadowColor = SHADOW_COLOR;
+      ctx.shadowBlur = 4 * scale;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 2 * scale;
+      ctx.fillStyle = STROKE_COLOR;
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.fillStyle = color;
+      ctx.fill();
+
+      // 5. Label pill
+      if (label) {
+        const shortLabel = label.length > 10 ? label.substring(0, 9) + '…' : label;
+        const fontSize = Math.max(11, 14 * scale);
+        ctx.font = `600 ${fontSize}px 'Sora', 'Outfit', sans-serif`;
+        const textMetrics = ctx.measureText(shortLabel);
+        const labelPadX = 8 * scale;
+        const labelPadY = 5 * scale;
+        const labelW = textMetrics.width + labelPadX * 2;
+        const labelH = fontSize + labelPadY * 2;
+        const labelX = fromX - labelW / 2;
+        const labelY = fromY - labelH - 12 * scale;
+
+        // Label shadow
+        ctx.shadowColor = 'rgba(0,0,0,0.15)';
+        ctx.shadowBlur = 6 * scale;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 2 * scale;
+
+        // Label background
+        ctx.fillStyle = '#FFFFFF';
+        roundRect(ctx, labelX, labelY, labelW, labelH, 6 * scale);
+        ctx.fill();
+
+        // Label text
+        ctx.shadowColor = 'transparent';
+        ctx.fillStyle = '#0F172A';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(shortLabel, fromX, labelY + labelH / 2);
       }
-      try {
-        if (navigator.share) {
-          const blob = await fetch(planImg.src).then(r => r.blob());
-          const file  = new File([blob], 'tidysnap-plan.png', { type: 'image/png' });
-          await navigator.share({
-            title: 'My TidySnap Plan',
-            text: 'Check out my AI desk organization plan!',
-            files: [file]
-          });
-        } else {
-          const canvas = document.createElement('canvas');
-          const ctx    = canvas.getContext('2d');
-          const img    = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = async () => {
-            canvas.width  = img.width;
-            canvas.height = img.height;
-            ctx?.drawImage(img, 0, 0);
-            canvas.toBlob(async blob => {
-              if (blob) {
-                await navigator.clipboard.write([
-                  new ClipboardItem({ 'image/png': blob })
-                ]);
-                alert('Image copied to clipboard!');
-              }
-            });
-          };
-          img.src = planImg.src;
+
+      // 6. Destination marker (orange circle at endpoint)
+      const destX = fromX + Math.cos(angle) * Math.max(30 * scale, length - 8 * scale);
+      const destY = fromY + Math.sin(angle) * Math.max(30 * scale, length - 8 * scale);
+      const destRadius = Math.max(10, 14 * scale);
+
+      ctx.beginPath();
+      ctx.arc(destX, destY, destRadius, 0, Math.PI * 2);
+      ctx.fillStyle = STROKE_COLOR;
+      ctx.shadowColor = SHADOW_COLOR;
+      ctx.shadowBlur = 4 * scale;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 2 * scale;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(destX, destY, destRadius - 2 * scale, 0, Math.PI * 2);
+      ctx.fillStyle = ARROW_ORANGE;
+      ctx.shadowColor = 'transparent';
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function roundRect(
+      ctx: CanvasRenderingContext2D,
+      x: number, y: number, w: number, h: number, r: number
+    ) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function renderArrowsOnCanvas(canvasId: string, imgId: string, items: any[]) {
+      const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+      const img = document.getElementById(imgId) as HTMLImageElement;
+      if (!canvas || !img || !items || items.length === 0) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Wait for image to load so we know its dimensions
+      const render = () => {
+        const w = img.clientWidth || img.naturalWidth;
+        const h = img.clientHeight || img.naturalHeight;
+        canvas.width = w;
+        canvas.height = h;
+
+        const scaleX = w / 100;
+        const scaleY = h / 100;
+
+        ctx.clearRect(0, 0, w, h);
+
+        const maxItems = Math.min(items.length, 8);
+        for (let i = 0; i < maxItems; i++) {
+          const item = items[i];
+          if (!item.from || !item.to) continue;
+
+          const fromX = item.from.x * scaleX;
+          const fromY = item.from.y * scaleY;
+          const toX = item.to.x * scaleX;
+          const toY = item.to.y * scaleY;
+          const color = ARROW_COLOR[item.action] || ARROW_COLOR.relocate;
+          const label = item.targetPosition.split(' ').slice(0, 3).join(' ') || item.name;
+
+          drawArrow(ctx, fromX, fromY, toX, toY, color, label, 1);
         }
-      } catch (err) {
-        console.error('Share failed:', err);
-        alert('Could not share image');
+      };
+
+      if (img.complete && img.naturalWidth > 0) {
+        render();
+      } else {
+        img.onload = render;
       }
-    });
+    }
+
+    // Composite clean image + canvas arrows for download
+    async function compositeArrowImage(
+      cleanImgSrc: string,
+      canvasEl: HTMLCanvasElement
+    ): Promise<string> {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) { reject(new Error('No 2D context')); return; }
+          ctx.drawImage(img, 0, 0);
+          // Scale canvas arrows to full resolution
+          const arrowCanvas = document.getElementById('arrow-canvas') as HTMLCanvasElement;
+          if (arrowCanvas && arrowCanvas.width > 0) {
+            ctx.drawImage(arrowCanvas, 0, 0, canvas.width, canvas.height);
+          }
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = reject;
+        img.src = cleanImgSrc;
+      });
+    }
 
     // ── Init ───────────────────────────────────
     // Handle post-Stripe checkout redirects
