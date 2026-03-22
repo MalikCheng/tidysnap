@@ -1709,13 +1709,21 @@ import '../styles/global.css';
 
         for (let i = 0; i < count; i++) {
           const item = items[i];
-          // Arrows: only draw if we have both from + to (directional arrows)
-          if (item.from && item.to) {
-            const fromX = item.from.x * scaleX;
-            const fromY = item.from.y * scaleY;
+          const pos = item.position;
+          if (!pos) continue;
+
+          // For items with position only (new API): draw numbered circle at position
+          const x = pos.x * scaleX;
+          const y = pos.y * scaleY;
+
+          // If we have direction info, draw arrow; otherwise just show number
+          if (item.to) {
             const toX = item.to.x * scaleX;
             const toY = item.to.y * scaleY;
-            drawArrowV2(ctx, fromX, fromY, toX, toY, i + 1, 1);
+            drawArrowV2(ctx, x, y, toX, toY, i + 1, 1);
+          } else {
+            // Draw just the numbered badge
+            drawArrowV2(ctx, x, y, x + 50, y + 30, i + 1, 1);
           }
         }
       };
@@ -1741,6 +1749,7 @@ import '../styles/global.css';
 
         for (let i = 0; i < count; i++) {
           const item = items[i];
+          // Support both old format (from) and new format (position)
           const pos = item.from || item.position;
           if (!pos) continue;
 
