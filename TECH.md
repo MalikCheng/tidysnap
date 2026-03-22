@@ -54,30 +54,93 @@ const model = genAI.getGenerativeModel({
 
 **Two-call fallback**: If the first `generateContent` call doesn't return an image (the model may not generate inline image data on first attempt), a second call specifically for image generation is attempted. If that also fails, the system continues with text-only output — this is the graceful Tier 2 degradation.
 
-### Prompt Engineering Strategy
+### 3-Step AI Pipeline (Current)
+
+The `analyze.ts` API implements a **3-step Gemini pipeline** for generating clean desk photos with labels:
+
+```
+User Upload (messy_desk.jpg)
+         │
+         ▼
+┌─────────────────────────────────┐
+│ Step 1: Vision Analysis         │
+│ Gemini → items JSON + summary    │  ~8-12s
+│ 5-8 items with positions       │
+└───────────────┬─────────────────┘
+                │
+                ▼
+┌─────────────────────────────────┐
+│ Step 2: Clean Desk Generation  │
+│ Gemini → clean_desk.jpg         │  ~12-18s
+│ Same desk, same items, tidy     │
+└───────────────┬─────────────────┘
+                │
+                ▼
+┌─────────────────────────────────┐
+│ Step 3: Label Overlay          │
+│ Gemini → labeled_clean.jpg      │  ~8-12s
+│ Number badges + legend          │
+└─────────────────────────────────┘
+```
+
+### Time Budget
+
+| Step | Budget | Total Cap |
+|------|--------|-----------|
+| Preprocessing | ~1s | - |
+| Step 1 (Vision) | 12s max | 13s |
+| Step 2 (Clean desk) | 18s max | 31s |
+| Step 3 (Labels) | 12s max | 43s |
+| Buffer | - | 45s (leaves 15s before 60s Vercel limit) |
+
+Each step has its own timeout and independently fails gracefully — if Step 2 fails, Step 3 is skipped but items + summary are still returned.
+
+### Prompt Engineering Strategy (3-Step)
 
 **Persona**: "Nana Banana 2, a friendly desk organization expert"
 
-**Phase 1 — Text Analysis** (JSON output):
+**Step 1 — Vision Analysis** (JSON output, ~8-12s):
 ```
-Analyze this messy desk image and create a tidy plan.
-Respond with EXACT JSON format:
-{
-  "items": [{ "name", "currentPosition", "targetPosition", "action" }],
-  "summary": "..."
+Identify every item on the desk, note current positions, decide target positions.
+Respond with ONLY valid JSON (no markdown):
+{ "items": [{ id, name, currentPosition, targetPosition, action }], "summary": "..." }
+```
+Max 5-8 items for clarity. Action: "relocate" | "remove" | "reorganize".
+
+**Step 2 — Clean Desk Generation** (image output, ~12-18s):
+```
+SAME desk surface/background as input photo (same lighting, same angle)
+SAME items visible, but ARRANGED neatly and tidily
+Keep same desk texture and color
+Remove any visible clutter
+Maintain photo-realistic quality — should look like a real photo
+No arrows, no labels, no text overlays
+```
+Key constraint: "THE SAME desk, now organized" — emphasizes preserving the original desk environment.
+
+**Step 3 — Label Overlay** (image output, ~8-12s):
+```
+NO arrows — use clean numbered circles or minimal badge labels instead
+Number each labeled item (1, 2, 3...)
+Small LEGEND in the top-right corner: semi-transparent dark background (#1C1917 at 80%), white text, rounded corners
+NUMBER BADGES: small circles (24px), white background, dark text, subtle shadow
+Maximum 6 labels — only the most important items
+```
+This is a CLEAN labeled image. The desk is already tidy. Add labels only.
+
+### Response Parsing
+
+```typescript
+interface TidyItem {
+  id: string;
+  name: string;
+  currentPosition: string;
+  targetPosition: string;
+  action: 'relocate' | 'remove' | 'reorganize';
 }
 ```
 
-**Phase 2 — Image Generation** (visual spec):
-```
-OVERLAY ON THE ORIGINAL IMAGE:
-- 🟢 GREEN #10B981 = relocate/reorganize
-- 🔴 RED #EF4444 = remove/put away
-- ALL arrows: 10px stroke, 3-4px WHITE outer stroke (non-negotiable)
-- Drop shadow: 2px offset-y, 3px blur, #1E293B at 50% opacity
-- Arrow heads: filled triangles, 3x stroke width
-- Curved paths preferred, max 10 arrows
-- LABEL PILLS: white background, #0F172A text, 8px radius, shadow
+Step 1 JSON is parsed directly — no regex fallback needed since we now require structured JSON output.
 - DESTINATION MARKERS: ORANGE #F97316 circles, 20px diameter
 - LEGEND: top-left corner "🟢 Move | 🔴 Remove"
 - Keep original desk photo fully visible underneath
@@ -107,13 +170,16 @@ interface TidyItem {
 
 Vercel serverless functions have a **60-second hard timeout** (Hobby plan). AI image generation can take 10-45 seconds. Without a degradation strategy, slow requests crash with opaque errors.
 
-### 3-Tier Fallback Chain
+### 4-Tier Degradation Chain (Updated for 3-Step)
 
 | Tier | Name | Trigger | Response |
 |------|------|---------|----------|
-| 1 | Full Mode | < 45s, no errors | `plan` + `imageUrl` + `items` |
-| 2 | Text-Only | 45-55s elapsed OR image gen failed | `plan` + `items` + `degradedMode: true` |
-| 3 | Graceful | > 55s OR critical error | Friendly error + size info + `degradedMode: true` |
+| 1 | Full 3-Step | < 43s, all steps succeed | `labelsImageUrl` + `tidyVisionUrl` + `items` + `plan` |
+| 2 | 2-Step | Step 2 succeeds, Step 3 fails | `tidyVisionUrl` + `items` + `plan` + `degradedMode: true` |
+| 3 | Text-Only | Step 2 fails | `items` + `plan` + `degradedMode: true` |
+| 4 | Graceful | Step 1 fails OR < 5s remaining | Friendly error + `degradedMode: true` |
+
+**Key difference**: Each step independently fails gracefully. Step 2 or 3 failure does NOT cause a full crash — the API returns whatever data it has. Only Step 1 failure returns degraded text-only.
 
 ### Implementation
 
@@ -364,11 +430,19 @@ const RATE_WINDOW_MS = 60_000;  // 1 minute window
 ```typescript
 {
   success: true;
-  plan: string;           // AI-generated text plan
-  imageUrl?: string;       // Base64 data URL of annotated image
-  items?: TidyItem[];     // Structured items if parseable
-  degradedMode?: boolean; // true if image gen failed/timed out
+  plan?: string;              // Summary text from Step 1 analysis
+  items?: TidyItem[];        // Structured items from Step 1
+  tidyVisionUrl?: string;    // Step 2: base64 data URL of clean desk photo
+  labelsImageUrl?: string;   // Step 3: base64 data URL of labeled clean desk
+  degradedMode?: boolean;    // true if Step 2 or 3 failed (text-only fallback)
 }
+```
+
+**Image priority for frontend**:
+1. Show `labelsImageUrl` if available (labeled clean desk)
+2. Fall back to `tidyVisionUrl` if available (clean desk, no labels)
+3. Fall back to `plan` + `items` if neither image available
+4. Show degraded badge if `degradedMode: true`
 ```
 
 **Response** (errors):
