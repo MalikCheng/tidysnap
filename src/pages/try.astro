@@ -1416,9 +1416,10 @@ import '../styles/global.css';
           document.getElementById('plan-image').src = afterImageUrl;
           document.getElementById('plan-frame').classList.remove('hidden');
 
-          // Render emoji labels on canvas if items[] provided
+          // Render canvas arrows + HTML label overlays
           if (data.items && data.items.length > 0) {
             renderArrowsOnCanvas('arrow-canvas', 'plan-image', data.items);
+            renderLabelsHTML('labels-container', 'plan-image', data.items);
           }
 
           // Download: if canvas arrows exist, use composited image; otherwise direct URL
