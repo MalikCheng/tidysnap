@@ -35,7 +35,7 @@ import '../styles/global.css';
   <!-- Additional SEO -->
   <meta name="theme-color" content="#059669">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <!-- Google OAuth: disabled — production domain not configured in Google Cloud Console. Use email login. -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     /* =============================================
@@ -900,9 +900,9 @@ import '../styles/global.css';
         <p class="text-stone-400 text-sm">Create a free account or sign in to analyze your desk</p>
       </div>
 
-      <!-- Google (hidden: production domain not configured in Google Cloud Console — 使用 email 登录即可完成付费) -->
+      <!-- Google OAuth -->
       <button id="google-login-btn" type="button"
-        class="hidden w-full flex items-center justify-center gap-3 px-5 py-3.5 bg-white border border-stone-200 rounded-xl font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-300 transition-all mb-4 text-sm">
+        class="w-full flex items-center justify-center gap-3 px-5 py-3.5 bg-white border border-stone-200 rounded-xl font-semibold text-stone-700 hover:bg-stone-50 hover:border-stone-300 transition-all mb-4 text-sm">
         <svg class="w-5 h-5" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -912,7 +912,7 @@ import '../styles/global.css';
         Continue with Google
       </button>
 
-      <div id="google-divider" class="hidden divider my-4">or</div>
+      <div id="google-divider" class="divider my-4">or</div>
 
       <form id="auth-form" class="space-y-3">
         <input type="email" id="auth-email" class="input-field" placeholder="you@example.com" required>
@@ -1112,8 +1112,25 @@ import '../styles/global.css';
     });
 
     // ── Auth ───────────────────────────────────
-    // Google OAuth: disabled (see HTML comment above). Use email login below.
-    // document.getElementById('google-login-btn')?.addEventListener('click', ...);
+    // Google OAuth
+    document.getElementById('google-login-btn')?.addEventListener('click', () => {
+      if (typeof google === 'undefined') {
+        alert('Google OAuth is loading. Please try again in a moment.');
+        return;
+      }
+      google.accounts.id.initialize({
+        client_id: '1011912925260-sttjvvqoomjls348ndipcm5fiu2pq9kf.apps.googleusercontent.com',
+        callback: async (response) => {
+          if (response.error) {
+            console.error('Google OAuth error:', response.error);
+            return;
+          }
+          // Send token to our API
+          await submitAuth('google_login', response.credential, null);
+        }
+      });
+      google.accounts.id.prompt();
+    });
 
     document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
       e.preventDefault();
